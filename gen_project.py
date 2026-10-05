@@ -73,6 +73,10 @@ plist_mac = file_ref("Platform/Mac/Info.plist", "text.plist.xml")
 add_child("Platform/Mac", plist_mac, "Info.plist")
 plist_pad = file_ref("Platform/Pad/Info.plist", "text.plist.xml")
 add_child("Platform/Pad", plist_pad, "Info.plist")
+assets_mac = file_ref("Platform/Mac/Assets.xcassets", "folder.assetcatalog")
+add_child("Platform/Mac", assets_mac, "Assets.xcassets")
+assets_pad = file_ref("Platform/Pad/Assets.xcassets", "folder.assetcatalog")
+add_child("Platform/Pad", assets_pad, "Assets.xcassets")
 
 # Intermediate directories
 all_dirs = set()
@@ -152,6 +156,15 @@ add(mac_frameworks, "PBXFrameworksBuildPhase", buildActionMask=2147483647, files
 add(pad_frameworks, "PBXFrameworksBuildPhase", buildActionMask=2147483647, files=pad_link, runOnlyForDeploymentPostprocessing=0)
 add(test_frameworks, "PBXFrameworksBuildPhase", buildActionMask=2147483647, files=test_link, runOnlyForDeploymentPostprocessing=0)
 
+mac_resources_phase = ident("phase:mac:resources")
+pad_resources_phase = ident("phase:pad:resources")
+mac_resources = [ident("build:Platform/Mac/Assets.xcassets")]
+pad_resources = [ident("build:Platform/Pad/Assets.xcassets")]
+add(ident("build:Platform/Mac/Assets.xcassets"), "PBXBuildFile", fileRef=assets_mac)
+add(ident("build:Platform/Pad/Assets.xcassets"), "PBXBuildFile", fileRef=assets_pad)
+add(mac_resources_phase, "PBXResourcesBuildPhase", buildActionMask=2147483647, files=mac_resources, runOnlyForDeploymentPostprocessing=0)
+add(pad_resources_phase, "PBXResourcesBuildPhase", buildActionMask=2147483647, files=pad_resources, runOnlyForDeploymentPostprocessing=0)
+
 project_id = ident("project")
 core_target = ident("target:core")
 mac_target = ident("target:mac")
@@ -181,7 +194,7 @@ add(core_target, "PBXNativeTarget",
     productType="com.apple.product-type.library.static")
 add(mac_target, "PBXNativeTarget",
     buildConfigurationList=ident("cfglist:mac"),
-    buildPhases=[mac_sources_phase, mac_frameworks],
+    buildPhases=[mac_sources_phase, mac_frameworks, mac_resources_phase],
     buildRules=[],
     dependencies=[mac_dep],
     name="PagerMac",
@@ -190,7 +203,7 @@ add(mac_target, "PBXNativeTarget",
     productType="com.apple.product-type.application")
 add(pad_target, "PBXNativeTarget",
     buildConfigurationList=ident("cfglist:pad"),
-    buildPhases=[pad_sources_phase, pad_frameworks],
+    buildPhases=[pad_sources_phase, pad_frameworks, pad_resources_phase],
     buildRules=[],
     dependencies=[pad_dep],
     name="PagerPad",
@@ -275,6 +288,7 @@ mac_extra = {
     # from the test bundle even with -export_dynamic; keep app symbols visible.
     "GCC_SYMBOLS_PRIVATE_EXTERN": "NO",
     "COMBINE_HIDPI_IMAGES": "YES",
+    "ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",
 }
 pad_extra = {
     "PRODUCT_NAME": "PagerPad",
@@ -286,6 +300,7 @@ pad_extra = {
     "GENERATE_INFOPLIST_FILE": "NO",
     "LD_RUNPATH_SEARCH_PATHS": "@executable_path/Frameworks",
     "OTHER_LDFLAGS": "-framework UIKit -framework PDFKit -framework CoreText -framework CoreGraphics -framework Foundation -framework UniformTypeIdentifiers -framework QuartzCore",
+    "ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",
 }
 test_extra = {
     "PRODUCT_NAME": "PagerCoreTests",
@@ -363,6 +378,7 @@ order = [
     "PBXGroup",
     "PBXNativeTarget",
     "PBXProject",
+    "PBXResourcesBuildPhase",
     "PBXSourcesBuildPhase",
     "PBXTargetDependency",
     "XCBuildConfiguration",

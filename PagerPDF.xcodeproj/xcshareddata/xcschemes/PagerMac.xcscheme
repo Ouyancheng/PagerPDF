@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "A10000000000000000001058"
+               BlueprintIdentifier = "A1000000000000000000105E"
                BuildableName = "PagerMac.app"
                BlueprintName = "PagerMac"
                ReferencedContainer = "container:PagerPDF.xcodeproj">
@@ -44,7 +44,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "A10000000000000000001058"
+            BlueprintIdentifier = "A1000000000000000000105E"
             BuildableName = "PagerMac.app"
             BlueprintName = "PagerMac"
             ReferencedContainer = "container:PagerPDF.xcodeproj">

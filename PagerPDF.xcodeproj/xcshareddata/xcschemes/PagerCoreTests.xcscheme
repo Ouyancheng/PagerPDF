@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "A10000000000000000001058"
+               BlueprintIdentifier = "A1000000000000000000105E"
                BuildableName = "PagerMac.app"
                BlueprintName = "PagerCoreTests"
                ReferencedContainer = "container:PagerPDF.xcodeproj">
@@ -32,7 +32,7 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "A1000000000000000000105A"
+               BlueprintIdentifier = "A10000000000000000001060"
                BuildableName = "PagerCoreTests.xctest"
                BlueprintName = "PagerCoreTests"
                ReferencedContainer = "container:PagerPDF.xcodeproj">
@@ -54,7 +54,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "A10000000000000000001058"
+            BlueprintIdentifier = "A1000000000000000000105E"
             BuildableName = "PagerMac.app"
             BlueprintName = "PagerCoreTests"
             ReferencedContainer = "container:PagerPDF.xcodeproj">
