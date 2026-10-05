@@ -1,27 +1,26 @@
 #include "OverlayRenderer.h"
 
-#include "Ink.hpp"
+#include "AnnotationGeometry.hpp"
 
 #include <CoreText/CoreText.h>
-#include <Foundation/Foundation.h>
 
+#include <algorithm>
 #include <cmath>
+#include <cstring>
+#include <initializer_list>
 #include <vector>
 
 namespace pager {
 namespace {
 
-const PageGeometry *FindPage(const DocumentSession &session, int index) {
-    return session.viewport().geometry(index);
+CGColorSpaceRef SRGB() {
+    static CGColorSpaceRef space = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
+    return space;
 }
 
-Point ToDocument(const DocumentSession &session, int pageIndex, Point user) {
-    const PageGeometry *page = FindPage(session, pageIndex);
-    if (page == nullptr) {
-        return {};
-    }
-    return session.viewport().layout().pageViewToDocument(pageIndex, UserToPageView(*page, user));
-}
+CGPoint ToCG(Point point) { return CGPointMake(point.x, point.y); }
+
+CGRect ToCG(const Rect &rect) { return CGRectMake(rect.x, rect.y, rect.width, rect.height); }
 
 void SetFill(CGContextRef context, Color color, float alphaScale) {
     CGContextSetRGBFillColor(context, color.r, color.g, color.b, color.a * alphaScale);
@@ -31,99 +30,133 @@ void SetStroke(CGContextRef context, Color color) {
     CGContextSetRGBStrokeColor(context, color.r, color.g, color.b, color.a == 0 ? 1 : color.a);
 }
 
-void FillQuad(CGContextRef context, const DocumentSession &session, int pageIndex, const Quad &quad) {
-    CGContextBeginPath(context);
-    const Point first = ToDocument(session, pageIndex, quad.v[0]);
-    CGContextMoveToPoint(context, first.x, first.y);
-    for (int index = 1; index < 4; ++index) {
-        const Point point = ToDocument(session, pageIndex, quad.v[index]);
-        CGContextAddLineToPoint(context, point.x, point.y);
-    }
-    CGContextClosePath(context);
-    CGContextFillPath(context);
+std::uint64_t Mix(std::uint64_t hash, std::uint64_t value) {
+    hash ^= value + 0x9E3779B97F4A7C15ull + (hash << 6) + (hash >> 2);
+    return hash;
 }
 
-void StrokeUserLine(CGContextRef context, const DocumentSession &session, int pageIndex, Point a, Point b, float width) {
-    const Point start = ToDocument(session, pageIndex, a);
-    const Point end = ToDocument(session, pageIndex, b);
-    CGContextSetLineWidth(context, std::max(1.0f, width) * static_cast<float>(session.viewport().layout().scale()));
+std::uint64_t Bits(double value) {
+    std::uint64_t bits = 0;
+    std::memcpy(&bits, &value, sizeof(bits));
+    return bits;
+}
+
+std::uint64_t InkFingerprint(const PageGeometry &page, const Annotation &note) {
+    std::uint64_t hash = Mix(0, static_cast<std::uint64_t>(note.samples.size()));
+    hash = Mix(hash, Bits(note.lineWidth));
+    hash = Mix(hash, (note.pressure ? 1u : 0u) | (note.cutStart ? 2u : 0u) | (note.cutEnd ? 4u : 0u));
+    hash = Mix(hash, static_cast<std::uint64_t>(page.rotation));
+    for (const std::size_t index : {std::size_t{0}, note.samples.size() / 2, note.samples.size() - 1}) {
+        if (index < note.samples.size()) {
+            hash = Mix(hash, Bits(note.samples[index].x));
+            hash = Mix(hash, Bits(note.samples[index].y));
+            hash = Mix(hash, Bits(note.samples[index].force));
+        }
+    }
+    return hash;
+}
+
+CGRect PageViewRect(const PageGeometry &page, const Rect &user) {
+    const Point a = UserToPageView(page, Point{user.x, user.y});
+    const Point b = UserToPageView(page, Point{user.x + user.width, user.y + user.height});
+    return ToCG(BoundsOfPoints(a, b));
+}
+
+void StrokeSegment(CGContextRef context, Point a, Point b, float width) {
+    CGContextSetLineWidth(context, std::max(1.0f, width));
     CGContextBeginPath(context);
-    CGContextMoveToPoint(context, start.x, start.y);
-    CGContextAddLineToPoint(context, end.x, end.y);
+    CGContextMoveToPoint(context, a.x, a.y);
+    CGContextAddLineToPoint(context, b.x, b.y);
     CGContextStrokePath(context);
 }
 
-void DrawQuads(CGContextRef context, const DocumentSession &session, const Annotation &note) {
-    for (const Quad &quad : note.quads) {
-        if (note.kind == AnnotationKind::Highlight) {
-            // Notes live on a clear overlay, so multiply would paint black. A translucent
-            // normal fill keeps the text readable the way Skim/Preview highlights do.
-            const float alpha = note.color.a > 0.01f && note.color.a < 0.85f ? 1 : 0.4f;
-            SetFill(context, note.color, alpha);
-            FillQuad(context, session, note.pageIndex, quad);
-            continue;
+void DrawQuads(CGContextRef context, const PageGeometry &page, const Annotation &note) {
+    if (note.kind == AnnotationKind::Highlight) {
+        // Notes composite over the page raster, so multiply is not available. A translucent
+        // normal fill keeps the text readable the way Skim/Preview highlights do. One path
+        // for every line so overlapping line boxes do not double the alpha.
+        const float alpha = note.color.a > 0.01f && note.color.a < 0.85f ? 1 : 0.4f;
+        SetFill(context, note.color, alpha);
+        CGContextBeginPath(context);
+        for (const Quad &quad : note.quads) {
+            CGContextMoveToPoint(context, UserToPageView(page, quad.v[0]).x, UserToPageView(page, quad.v[0]).y);
+            for (int corner = 1; corner < 4; ++corner) {
+                const Point point = UserToPageView(page, quad.v[corner]);
+                CGContextAddLineToPoint(context, point.x, point.y);
+            }
+            CGContextClosePath(context);
         }
-        SetStroke(context, note.color);
-        const float width = note.lineWidth > 0 ? note.lineWidth : 1.5f;
+        CGContextFillPath(context);
+        return;
+    }
+    SetStroke(context, note.color);
+    CGContextSetLineCap(context, kCGLineCapButt);
+    const float width = note.lineWidth > 0 ? note.lineWidth : 1.5f;
+    for (const Quad &quad : note.quads) {
         if (note.kind == AnnotationKind::Underline) {
-            StrokeUserLine(context, session, note.pageIndex, quad.v[0], quad.v[1], width);
+            StrokeSegment(context, UserToPageView(page, quad.v[0]), UserToPageView(page, quad.v[1]), width);
         } else {
             const Point midA{(quad.v[0].x + quad.v[3].x) * 0.5, (quad.v[0].y + quad.v[3].y) * 0.5};
             const Point midB{(quad.v[1].x + quad.v[2].x) * 0.5, (quad.v[1].y + quad.v[2].y) * 0.5};
-            StrokeUserLine(context, session, note.pageIndex, midA, midB, width);
+            StrokeSegment(context, UserToPageView(page, midA), UserToPageView(page, midB), width);
         }
     }
 }
 
-void DrawShape(CGContextRef context, const DocumentSession &session, const Annotation &note, bool hideContents = false) {
-    const Point a = ToDocument(session, note.pageIndex, Point{note.bounds.x, note.bounds.y});
-    const Point b = ToDocument(session, note.pageIndex, Point{note.bounds.x + note.bounds.width, note.bounds.y + note.bounds.height});
-    const CGRect rect = CGRectMake(std::min(a.x, b.x), std::min(a.y, b.y), std::abs(a.x - b.x), std::abs(a.y - b.y));
+void DrawText(CGContextRef context, const Annotation &note, CGRect rect) {
+    CFStringRef text = CFStringCreateWithCString(kCFAllocatorDefault, note.contents.c_str(), kCFStringEncodingUTF8);
+    if (text == nullptr) {
+        return;
+    }
+    CGContextSaveGState(context);
+    CGContextClipToRect(context, rect);
+    // The CTM is y-down; CoreText lays out y-up.
+    CGContextTranslateCTM(context, rect.origin.x, CGRectGetMaxY(rect));
+    CGContextScaleCTM(context, 1, -1);
+    const CGFloat size = std::max(8.0f, note.fontSize > 0 ? note.fontSize : 14);
+    CTFontRef font = CTFontCreateWithName(CFSTR("Helvetica"), size, nullptr);
+    const CGFloat components[] = {note.color.r, note.color.g, note.color.b, note.color.a == 0 ? 1 : note.color.a};
+    CGColorRef color = CGColorCreate(SRGB(), components);
+    const void *keys[] = {kCTFontAttributeName, kCTForegroundColorAttributeName};
+    const void *values[] = {font, color};
+    CFDictionaryRef attributes = CFDictionaryCreate(kCFAllocatorDefault, keys, values, 2, &kCFTypeDictionaryKeyCallBacks,
+                                                    &kCFTypeDictionaryValueCallBacks);
+    CFAttributedStringRef attributed = CFAttributedStringCreate(kCFAllocatorDefault, text, attributes);
+    CTFramesetterRef setter = CTFramesetterCreateWithAttributedString(attributed);
+    const CGRect textRect = CGRectInset(CGRectMake(0, 0, rect.size.width, rect.size.height), 6, 4);
+    if (textRect.size.width > 0 && textRect.size.height > 0) {
+        CGPathRef path = CGPathCreateWithRect(textRect, nullptr);
+        CTFrameRef frame = CTFramesetterCreateFrame(setter, CFRangeMake(0, 0), path, nullptr);
+        CTFrameDraw(frame, context);
+        CFRelease(frame);
+        CGPathRelease(path);
+    }
+    CFRelease(setter);
+    CFRelease(attributed);
+    CFRelease(attributes);
+    CGColorRelease(color);
+    CFRelease(font);
+    CFRelease(text);
+    CGContextRestoreGState(context);
+}
+
+void DrawShape(CGContextRef context, const PageGeometry &page, const Annotation &note, bool hideContents) {
+    const CGRect rect = PageViewRect(page, note.bounds);
     SetStroke(context, note.color);
-    CGContextSetLineWidth(context, std::max(1.0f, note.lineWidth) * static_cast<float>(session.viewport().layout().scale()));
+    CGContextSetLineWidth(context, std::max(1.0f, note.lineWidth));
     CGContextSetLineCap(context, kCGLineCapRound);
     CGContextSetLineJoin(context, kCGLineJoinRound);
     if (note.kind == AnnotationKind::Circle) {
         CGContextStrokeEllipseInRect(context, rect);
     } else if (note.kind == AnnotationKind::Line) {
-        StrokeUserLine(context, session, note.pageIndex, note.lineStart, note.lineEnd, note.lineWidth);
+        StrokeSegment(context, UserToPageView(page, note.lineStart), UserToPageView(page, note.lineEnd), note.lineWidth);
     } else if (note.kind == AnnotationKind::FreeText) {
         CGContextSetRGBFillColor(context, 1, 1, 1, 0.92);
         CGContextFillRect(context, rect);
-        SetStroke(context, note.color);
         CGContextSetLineWidth(context, 1);
         CGContextStrokeRect(context, rect);
         if (!hideContents && !note.contents.empty()) {
-            CGContextSaveGState(context);
-            CGContextTranslateCTM(context, rect.origin.x, CGRectGetMaxY(rect));
-            CGContextScaleCTM(context, 1, -1);
-            const double scale = std::max(0.25, session.viewport().layout().scale());
-            const CGFloat size = std::max(8.0f, note.fontSize > 0 ? note.fontSize : 14) * static_cast<CGFloat>(scale);
-            NSString *text = @(note.contents.c_str());
-            CTFontRef font = CTFontCreateWithName(CFSTR("Helvetica"), size, nullptr);
-            CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
-            const CGFloat components[] = {note.color.r, note.color.g, note.color.b, note.color.a == 0 ? 1 : note.color.a};
-            CGColorRef cgColor = CGColorCreate(colorSpace, components);
-            const void *keys[] = {kCTFontAttributeName, kCTForegroundColorAttributeName};
-            const void *values[] = {font, cgColor};
-            CFDictionaryRef attrs = CFDictionaryCreate(kCFAllocatorDefault, keys, values, 2, &kCFTypeDictionaryKeyCallBacks,
-                                                       &kCFTypeDictionaryValueCallBacks);
-            CFAttributedStringRef attributed =
-                CFAttributedStringCreate(kCFAllocatorDefault, (__bridge CFStringRef)text, attrs);
-            CTFramesetterRef setter = CTFramesetterCreateWithAttributedString(attributed);
-            const CGRect textRect = CGRectInset(CGRectMake(0, 0, rect.size.width, rect.size.height), 6, 4);
-            CGPathRef path = CGPathCreateWithRect(textRect, nullptr);
-            CTFrameRef frame = CTFramesetterCreateFrame(setter, CFRangeMake(0, 0), path, nullptr);
-            CTFrameDraw(frame, context);
-            CFRelease(frame);
-            CGPathRelease(path);
-            CFRelease(setter);
-            CFRelease(attributed);
-            CFRelease(attrs);
-            CGColorRelease(cgColor);
-            CGColorSpaceRelease(colorSpace);
-            CFRelease(font);
-            CGContextRestoreGState(context);
+            DrawText(context, note, rect);
         }
     } else {
         SetFill(context, note.color, 0.15f);
@@ -132,91 +165,64 @@ void DrawShape(CGContextRef context, const DocumentSession &session, const Annot
     }
 }
 
-void FillRibbon(CGContextRef context, const DocumentSession &session, int pageIndex, const std::vector<Triangle> &ribbon) {
-    for (const Triangle &triangle : ribbon) {
-        const Point a = session.viewport().layout().pageViewToDocument(pageIndex, triangle.a);
-        const Point b = session.viewport().layout().pageViewToDocument(pageIndex, triangle.b);
-        const Point c = session.viewport().layout().pageViewToDocument(pageIndex, triangle.c);
-        CGContextBeginPath(context);
-        CGContextMoveToPoint(context, a.x, a.y);
-        CGContextAddLineToPoint(context, b.x, b.y);
-        CGContextAddLineToPoint(context, c.x, c.y);
-        CGContextClosePath(context);
-        CGContextFillPath(context);
-    }
-}
-
-void DrawInk(CGContextRef context, const DocumentSession &session, const Annotation &note, const std::vector<InkSample> &samples) {
-    const PageGeometry *page = FindPage(session, note.pageIndex);
-    if (page == nullptr || samples.empty()) {
+void FillInk(CGContextRef context, CGPathRef path, Color color, float opacity) {
+    if (path == nullptr) {
         return;
     }
-    const float baseWidth = note.lineWidth <= 0 ? 2 : note.lineWidth;
-    std::vector<InkSample> committed;
-    std::vector<InkSample> predicted;
-    committed.reserve(samples.size());
-    for (const InkSample &sample : samples) {
-        if (sample.predicted) {
-            predicted.push_back(sample);
-        } else {
-            committed.push_back(sample);
-        }
-    }
-    const float alpha = note.opacity == 0 ? 1 : note.opacity;
-    if (!committed.empty()) {
-        SetFill(context, note.color, alpha);
-        FillRibbon(context, session, note.pageIndex, BuildRibbon(committed, *page, baseWidth, note.pressure));
-    }
-    if (!predicted.empty()) {
-        std::vector<InkSample> tail;
-        if (!committed.empty()) {
-            tail.push_back(committed.back());
-        }
-        tail.insert(tail.end(), predicted.begin(), predicted.end());
-        SetFill(context, note.color, alpha * 0.38f);
-        FillRibbon(context, session, note.pageIndex, BuildRibbon(tail, *page, baseWidth, note.pressure));
-    }
+    SetFill(context, color, opacity);
+    CGContextBeginPath(context);
+    CGContextAddPath(context, path);
+    CGContextFillPath(context);
 }
 
-void DrawShapeDraft(CGContextRef context, const DocumentSession &session) {
-    const ShapeDraft &draft = session.shapeDraft();
-    if (!draft.active) {
-        return;
-    }
-    const PageGeometry *page = FindPage(session, draft.pageIndex);
+CGRect DocumentRectForPage(const DocumentSession &session, int pageIndex) {
+    return ToCG(session.viewport().layout().pageFrame(pageIndex));
+}
+
+// Runs `draw` with the CTM moved into the page's page-view space.
+template <typename Draw>
+void InPage(CGContextRef context, const DocumentSession &session, int pageIndex, Draw draw) {
+    const PageGeometry *page = session.viewport().geometry(pageIndex);
     if (page == nullptr) {
         return;
     }
-    Annotation note;
-    note.kind = draft.kind;
-    note.pageIndex = draft.pageIndex;
-    note.color = draft.color;
-    note.lineWidth = draft.lineWidth;
-    note.lineStart = PageViewToUser(*page, draft.start);
-    note.lineEnd = PageViewToUser(*page, draft.current);
-    note.bounds = BoundsOfPoints(note.lineStart, note.lineEnd);
-    DrawShape(context, session, note);
+    const CGRect frame = DocumentRectForPage(session, pageIndex);
+    const double scale = session.viewport().layout().scale();
+    CGContextSaveGState(context);
+    CGContextTranslateCTM(context, frame.origin.x, frame.origin.y);
+    CGContextScaleCTM(context, scale, scale);
+    draw(*page);
+    CGContextRestoreGState(context);
 }
 
-void DrawSelection(CGContextRef context, const DocumentSession &session) {
-    if (session.selectedNote().value == 0) {
-        return;
-    }
-    const Annotation *selected = nullptr;
-    for (const Annotation &note : session.notes().annotations()) {
-        if (note.id == session.selectedNote()) {
-            selected = &note;
-            break;
+void FillDocumentQuad(CGContextRef context, const DocumentSession &session, int pageIndex, const Quad &quad) {
+    InPage(context, session, pageIndex, [&](const PageGeometry &page) {
+        CGContextBeginPath(context);
+        const Point first = UserToPageView(page, quad.v[0]);
+        CGContextMoveToPoint(context, first.x, first.y);
+        for (int index = 1; index < 4; ++index) {
+            const Point point = UserToPageView(page, quad.v[index]);
+            CGContextAddLineToPoint(context, point.x, point.y);
         }
-    }
+        CGContextClosePath(context);
+        CGContextFillPath(context);
+    });
+}
+
+void DrawSelectionChrome(CGContextRef context, const DocumentSession &session) {
+    const Annotation *selected = session.selectedAnnotation();
     if (selected == nullptr) {
         return;
     }
-    const Point min = ToDocument(session, selected->pageIndex, Point{selected->bounds.x, selected->bounds.y});
-    const Point max = ToDocument(session, selected->pageIndex,
-                                 Point{selected->bounds.x + selected->bounds.width, selected->bounds.y + selected->bounds.height});
-    CGRect rect = CGRectMake(std::min(min.x, max.x) - 4, std::min(min.y, max.y) - 4, std::abs(max.x - min.x) + 8,
-                             std::abs(max.y - min.y) + 8);
+    const PageGeometry *page = session.viewport().geometry(selected->pageIndex);
+    if (page == nullptr) {
+        return;
+    }
+    const CGRect frame = DocumentRectForPage(session, selected->pageIndex);
+    CGRect rect = PageViewRect(*page, selected->bounds);
+    rect = CGRectOffset(rect, frame.origin.x, frame.origin.y);
+    rect = CGRectInset(rect, -4, -4);
+    CGContextSaveGState(context);
     CGContextSetRGBStrokeColor(context, 0.15, 0.45, 0.95, 1);
     CGContextSetLineWidth(context, 1.5);
     const CGFloat dash[] = {5, 3};
@@ -235,55 +241,96 @@ void DrawSelection(CGContextRef context, const DocumentSession &session) {
             CGContextFillEllipseInRect(context, CGRectMake(corner.x - handle * 0.5, corner.y - handle * 0.5, handle, handle));
         }
     }
-}
-
-void DrawAnnotation(CGContextRef context, const DocumentSession &session, const Annotation &note,
-                    AnnotationId hideContents = {}) {
-    if (!note.quads.empty() && (note.kind == AnnotationKind::Highlight || note.kind == AnnotationKind::Underline ||
-                                note.kind == AnnotationKind::StrikeOut)) {
-        DrawQuads(context, session, note);
-        return;
-    }
-    if (note.kind == AnnotationKind::Ink) {
-        DrawInk(context, session, note, note.samples);
-        return;
-    }
-    DrawShape(context, session, note, note.id == hideContents);
-}
-
-bool IntersectsDirty(const DocumentSession &session, const Annotation &note, CGRect dirty) {
-    const Point min = ToDocument(session, note.pageIndex, Point{note.bounds.x, note.bounds.y});
-    const Point max = ToDocument(session, note.pageIndex,
-                                 Point{note.bounds.x + note.bounds.width, note.bounds.y + note.bounds.height});
-    const double slop =
-        std::max(2.0, static_cast<double>(note.lineWidth) * session.viewport().layout().scale() + 2.0) +
-        (note.kind == AnnotationKind::Ink ? 10.0 * session.viewport().layout().scale() : 0);
-    const CGRect bounds =
-        CGRectMake(std::min(min.x, max.x) - slop, std::min(min.y, max.y) - slop,
-                   std::abs(max.x - min.x) + slop * 2, std::abs(max.y - min.y) + slop * 2);
-    return CGRectIntersectsRect(bounds, dirty);
-}
-
-void DrawTile(CGContextRef context, CGRect frame, CGImageRef image) {
-    if (image == nullptr) {
-        return;
-    }
-    CGContextSaveGState(context);
-    // Tiles are already rasterized at the display density. Extra interpolation
-    // turns crisp glyphs into mush when the rect is a few pixels off.
-    CGContextSetInterpolationQuality(context, kCGInterpolationNone);
-    CGContextTranslateCTM(context, frame.origin.x, frame.origin.y + frame.size.height);
-    CGContextScaleCTM(context, 1, -1);
-    CGContextDrawImage(context, CGRectMake(0, 0, frame.size.width, frame.size.height), image);
     CGContextRestoreGState(context);
 }
 
 }  // namespace
 
-void DrawLivePen(CGContextRef context, const DocumentSession &session) {
-    if (!session.pen().active()) {
+InkPathCache::~InkPathCache() { clear(); }
+
+void InkPathCache::clear() {
+    for (auto &entry : entries_) {
+        CGPathRelease(entry.second.path);
+    }
+    entries_.clear();
+}
+
+CGPathRef InkPathCache::pathFor(const PageGeometry &page, const Annotation &note) {
+    const std::uint64_t key = Mix(note.id.value, static_cast<std::uint64_t>(note.pageIndex));
+    const std::uint64_t fingerprint = InkFingerprint(page, note);
+    auto found = entries_.find(key);
+    if (found != entries_.end() && found->second.fingerprint == fingerprint && found->second.path != nullptr) {
+        return found->second.path;
+    }
+    if (entries_.size() > 4096) {
+        clear();
+        found = entries_.end();
+    }
+    CGPathRef path = CreateRibbonPath(
+        BuildRibbon(note.samples, page, note.lineWidth <= 0 ? 2 : note.lineWidth, note.pressure, RibbonOptionsFor(note)));
+    if (found != entries_.end()) {
+        CGPathRelease(found->second.path);
+        found->second = Entry{fingerprint, path};
+    } else {
+        entries_.emplace(key, Entry{fingerprint, path});
+    }
+    return path;
+}
+
+CGPathRef CreateRibbonPath(const std::vector<Triangle> &triangles) {
+    if (triangles.empty()) {
+        return nullptr;
+    }
+    CGMutablePathRef path = CGPathCreateMutable();
+    for (const Triangle &triangle : triangles) {
+        CGPathMoveToPoint(path, nullptr, triangle.a.x, triangle.a.y);
+        CGPathAddLineToPoint(path, nullptr, triangle.b.x, triangle.b.y);
+        CGPathAddLineToPoint(path, nullptr, triangle.c.x, triangle.c.y);
+        CGPathCloseSubpath(path);
+    }
+    return path;
+}
+
+RibbonOptions RibbonOptionsFor(const Annotation &note) {
+    RibbonOptions options;
+    options.taperHead = !note.cutStart;
+    options.taperTail = !note.cutEnd;
+    return options;
+}
+
+void DrawInkSamplesInPage(CGContextRef context, const PageGeometry &page, const std::vector<InkSample> &samples,
+                          Color color, float lineWidth, bool pressure, RibbonOptions options) {
+    if (samples.empty()) {
         return;
     }
+    CGPathRef path = CreateRibbonPath(BuildRibbon(samples, page, lineWidth <= 0 ? 2 : lineWidth, pressure, options));
+    FillInk(context, path, color, 1);
+    CGPathRelease(path);
+}
+
+void DrawAnnotationInPage(CGContextRef context, const PageGeometry &page, const Annotation &note,
+                          AnnotationId hideContents, InkPathCache *cache) {
+    CGContextSaveGState(context);
+    if (!note.quads.empty() && (note.kind == AnnotationKind::Highlight || note.kind == AnnotationKind::Underline ||
+                                note.kind == AnnotationKind::StrikeOut)) {
+        DrawQuads(context, page, note);
+    } else if (note.kind == AnnotationKind::Ink) {
+        const float opacity = note.opacity == 0 ? 1 : note.opacity;
+        if (cache != nullptr) {
+            FillInk(context, cache->pathFor(page, note), note.color, opacity);
+        } else {
+            CGPathRef path = CreateRibbonPath(BuildRibbon(note.samples, page, note.lineWidth <= 0 ? 2 : note.lineWidth,
+                                                          note.pressure, RibbonOptionsFor(note)));
+            FillInk(context, path, note.color, opacity);
+            CGPathRelease(path);
+        }
+    } else {
+        DrawShape(context, page, note, hideContents.value != 0 && note.id == hideContents);
+    }
+    CGContextRestoreGState(context);
+}
+
+Annotation LiveStrokeStyle(const DocumentSession &session) {
     Annotation live;
     live.kind = AnnotationKind::Ink;
     live.pageIndex = session.penPage();
@@ -292,7 +339,45 @@ void DrawLivePen(CGContextRef context, const DocumentSession &session) {
     live.lineWidth = style.lineWidth > 0 ? style.lineWidth : (session.tool() == Tool::Marker ? 14 : 2.2f);
     live.pressure = session.tool() == Tool::Pen;
     live.opacity = 1;
-    DrawInk(context, session, live, session.pen().display());
+    return live;
+}
+
+void DrawAnnotationInDocument(CGContextRef context, const DocumentSession &session, const Annotation &note,
+                              AnnotationId hideContents) {
+    InPage(context, session, note.pageIndex,
+           [&](const PageGeometry &page) { DrawAnnotationInPage(context, page, note, hideContents); });
+}
+
+void DrawLivePen(CGContextRef context, const DocumentSession &session) {
+    if (!session.pen().active()) {
+        return;
+    }
+    const Annotation live = LiveStrokeStyle(session);
+    // Committed and predicted samples form one ribbon at full strength: drawing the
+    // prediction as a separate faint tail pinches the stroke where the two meet.
+    InPage(context, session, live.pageIndex, [&](const PageGeometry &page) {
+        DrawInkSamplesInPage(context, page, session.pen().display(), live.color, live.lineWidth, live.pressure);
+    });
+}
+
+void DrawShapeDraft(CGContextRef context, const DocumentSession &session) {
+    const ShapeDraft &draft = session.shapeDraft();
+    if (!draft.active) {
+        return;
+    }
+    const PageGeometry *page = session.viewport().geometry(draft.pageIndex);
+    if (page == nullptr) {
+        return;
+    }
+    Annotation note;
+    note.kind = draft.kind;
+    note.pageIndex = draft.pageIndex;
+    note.color = draft.color;
+    note.lineWidth = draft.lineWidth;
+    note.lineStart = PageViewToUser(*page, draft.start);
+    note.lineEnd = PageViewToUser(*page, draft.current);
+    note.bounds = BoundsOfPoints(note.lineStart, note.lineEnd);
+    DrawAnnotationInDocument(context, session, note);
 }
 
 void DrawPageLayer(CGContextRef context, CGRect dirty, const std::vector<CGRect> &pages,
@@ -307,7 +392,7 @@ void DrawPageLayer(CGContextRef context, CGRect dirty, const std::vector<CGRect>
     CGContextFillRect(context, dirty);
     CGContextRestoreGState(context);
     for (const CGRect pageRect : pages) {
-        if (!CGRectIntersectsRect(pageRect, dirty)) {
+        if (!CGRectIntersectsRect(CGRectInset(pageRect, -2, -4), dirty)) {
             continue;
         }
         CGContextSetRGBFillColor(context, 0, 0, 0, 0.16);
@@ -323,48 +408,30 @@ void DrawPageLayer(CGContextRef context, CGRect dirty, const std::vector<CGRect>
         if (tile.pageClip.size.width > 0 && tile.pageClip.size.height > 0) {
             CGContextClipToRect(context, tile.pageClip);
         }
-        DrawTile(context, tile.frame, tile.image);
+        // Nearest-neighbour is only lossless when the tile lands 1:1 on device pixels;
+        // fallback tiles from another zoom are resampled.
+        const CGSize device = CGContextConvertSizeToDeviceSpace(context, tile.frame.size);
+        const double ratio = std::fabs(device.width) / std::max<size_t>(1, CGImageGetWidth(tile.image));
+        CGContextSetInterpolationQuality(context, std::fabs(ratio - 1) < 0.01 ? kCGInterpolationNone
+                                                                               : kCGInterpolationMedium);
+        CGContextTranslateCTM(context, tile.frame.origin.x, tile.frame.origin.y + tile.frame.size.height);
+        CGContextScaleCTM(context, 1, -1);
+        CGContextDrawImage(context, CGRectMake(0, 0, tile.frame.size.width, tile.frame.size.height), tile.image);
         CGContextRestoreGState(context);
     }
 }
 
-void DrawPages(CGContextRef context, CGRect dirty, const DocumentSession &session, const TileImageLookup &images,
-               const TileFallbackWalk &fallbacks) {
-    std::vector<CGRect> pages;
-    std::vector<PageTileBlit> tiles;
-    for (const PageFrame &frame : session.viewport().layout().pages()) {
-        pages.push_back(CGRectMake(frame.frame.x, frame.frame.y, frame.frame.width, frame.frame.height));
-    }
-    if (fallbacks) {
-        fallbacks([&](int pageIndex, CGRect frame, CGImageRef image) {
-            if (image == nullptr) {
-                return;
-            }
-            const Rect page = session.viewport().layout().pageFrame(pageIndex);
-            tiles.push_back(PageTileBlit{CGRectMake(page.x, page.y, page.width, page.height), frame, image});
-        });
-    }
-    if (images) {
-        for (const TileSlot &slot : session.viewport().visibleSlots()) {
-            const CGRect frame = CGRectMake(slot.documentFrame.x, slot.documentFrame.y, slot.documentFrame.width,
-                                            slot.documentFrame.height);
-            const Rect page = session.viewport().layout().pageFrame(slot.key.page);
-            tiles.push_back(PageTileBlit{CGRectMake(page.x, page.y, page.width, page.height), frame, images(slot.key)});
-        }
-    }
-    DrawPageLayer(context, dirty, pages, tiles);
-}
-
 void DrawSessionOverlay(CGContextRef context, CGRect dirty, const DocumentSession &session, bool drawLivePen,
                         AnnotationId hideContents) {
-    for (const Annotation &note : session.imported) {
-        if (IntersectsDirty(session, note, dirty)) {
-            DrawAnnotation(context, session, note, hideContents);
-        }
-    }
     for (const Annotation &note : session.notes().annotations()) {
-        if (IntersectsDirty(session, note, dirty)) {
-            DrawAnnotation(context, session, note, hideContents);
+        const PageGeometry *page = session.viewport().geometry(note.pageIndex);
+        if (page == nullptr) {
+            continue;
+        }
+        const CGRect frame = DocumentRectForPage(session, note.pageIndex);
+        const CGRect bounds = CGRectOffset(ToCG(PageViewPaintBounds(*page, note)), frame.origin.x, frame.origin.y);
+        if (CGRectIntersectsRect(bounds, dirty)) {
+            DrawAnnotationInDocument(context, session, note, hideContents);
         }
     }
     const TextSelection &selection = session.selection();
@@ -378,33 +445,27 @@ void DrawSessionOverlay(CGContextRef context, CGRect dirty, const DocumentSessio
         for (const SelectionQuad &quad : selection.quads) {
             preview.pageIndex = quad.pageIndex;
             preview.quads = {quad.quad};
-            DrawQuads(context, session, preview);
+            DrawAnnotationInDocument(context, session, preview);
         }
     } else {
         CGContextSetRGBFillColor(context, 0.2, 0.45, 0.95, 0.28);
         for (const SelectionQuad &quad : selection.quads) {
-            FillQuad(context, session, quad.pageIndex, quad.quad);
+            FillDocumentQuad(context, session, quad.pageIndex, quad.quad);
         }
     }
     const int searchCount = static_cast<int>(session.searchHits().size());
     for (int index = 0; index < searchCount; ++index) {
         const bool current = index == session.searchIndex();
-        CGContextSetRGBFillColor(context, current ? 1 : 1, current ? 0.55 : 0.85, 0.1, current ? 0.45 : 0.25);
+        CGContextSetRGBFillColor(context, 1, current ? 0.55 : 0.85, 0.1, current ? 0.45 : 0.25);
         for (const SelectionQuad &quad : session.searchHits()[static_cast<std::size_t>(index)].quads) {
-            FillQuad(context, session, quad.pageIndex, quad.quad);
+            FillDocumentQuad(context, session, quad.pageIndex, quad.quad);
         }
     }
     DrawShapeDraft(context, session);
-    DrawSelection(context, session);
+    DrawSelectionChrome(context, session);
     if (drawLivePen) {
         DrawLivePen(context, session);
     }
-}
-
-void DrawDocument(CGContextRef context, CGRect dirty, const DocumentSession &session, const TileImageLookup &images,
-                  bool drawLivePen, const TileFallbackWalk &fallbacks) {
-    DrawPages(context, dirty, session, images, fallbacks);
-    DrawSessionOverlay(context, dirty, session, drawLivePen);
 }
 
 }  // namespace pager

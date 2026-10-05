@@ -1,5 +1,7 @@
 #include "DocumentSession.hpp"
 
+#include "AnnotationGeometry.hpp"
+
 #include <algorithm>
 #include <cmath>
 
@@ -26,81 +28,10 @@ Color DefaultColor(AnnotationKind kind) {
     return Color{};
 }
 
-double Distance(Point a, Point b) {
-    const double dx = a.x - b.x;
-    const double dy = a.y - b.y;
-    return std::sqrt(dx * dx + dy * dy);
-}
-
-double DistanceToSegment(Point point, Point start, Point end) {
-    const double dx = end.x - start.x;
-    const double dy = end.y - start.y;
-    const double lengthSquared = dx * dx + dy * dy;
-    double t = 0;
-    if (lengthSquared > 0) {
-        t = ((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSquared;
-        t = std::clamp(t, 0.0, 1.0);
-    }
-    return Distance(point, Point{start.x + t * dx, start.y + t * dy});
-}
-
-bool PointInQuad(Point point, const Quad& quad) {
-    bool inside = false;
-    for (int index = 0, previous = 3; index < 4; previous = index++) {
-        const Point a = quad.v[index];
-        const Point b = quad.v[previous];
-        const bool crosses = (a.y > point.y) != (b.y > point.y);
-        if (crosses && point.x < (b.x - a.x) * (point.y - a.y) / (b.y - a.y) + a.x) {
-            inside = !inside;
-        }
-    }
-    return inside;
-}
-
-bool HitsNote(const Annotation& note, const PageGeometry& page, Point pageView, double slop) {
-    if (note.kind == AnnotationKind::Line) {
-        return DistanceToSegment(pageView, UserToPageView(page, note.lineStart), UserToPageView(page, note.lineEnd)) <= slop;
-    }
-    if (note.kind == AnnotationKind::Ink) {
-        for (const InkSample& sample : note.samples) {
-            if (Distance(pageView, UserToPageView(page, Point{sample.x, sample.y})) <= slop) {
-                return true;
-            }
-        }
-        return false;
-    }
-    if (!note.quads.empty() && (note.kind == AnnotationKind::Highlight || note.kind == AnnotationKind::Underline ||
-                                note.kind == AnnotationKind::StrikeOut)) {
-        const Point user = PageViewToUser(page, pageView);
-        for (const Quad& quad : note.quads) {
-            if (PointInQuad(user, quad)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    const Point min = UserToPageView(page, Point{note.bounds.x, note.bounds.y});
-    const Point max = UserToPageView(page, Point{note.bounds.x + note.bounds.width, note.bounds.y + note.bounds.height});
-    Rect bounds = BoundsOfPoints(min, max);
-    bounds.x -= slop;
-    bounds.y -= slop;
-    bounds.width += slop * 2;
-    bounds.height += slop * 2;
-    if (note.kind == AnnotationKind::Circle) {
-        const Point center = bounds.center();
-        const double radiusX = std::max(1.0, bounds.width * 0.5);
-        const double radiusY = std::max(1.0, bounds.height * 0.5);
-        const double nx = (pageView.x - center.x) / radiusX;
-        const double ny = (pageView.y - center.y) / radiusY;
-        return nx * nx + ny * ny <= 1;
-    }
-    return bounds.contains(pageView);
-}
-
 const Annotation* TopHit(const std::vector<Annotation>& notes, int pageIndex, const PageGeometry& page, Point pageView,
                          double slop) {
     for (auto note = notes.rbegin(); note != notes.rend(); ++note) {
-        if (note->pageIndex == pageIndex && HitsNote(*note, page, pageView, slop)) {
+        if (note->pageIndex == pageIndex && HitsAnnotation(*note, page, pageView, slop)) {
             return &*note;
         }
     }
@@ -191,6 +122,7 @@ Annotation* DocumentSession::selectedAnnotationMutable() {
 void DocumentSession::setSearchHits(std::vector<TextSelection> hits) {
     searchHits_ = std::move(hits);
     searchIndex_ = searchHits_.empty() ? -1 : 0;
+    ++searchRevision_;
 }
 
 const TextSelection* DocumentSession::currentSearchHit() const {
@@ -210,6 +142,7 @@ bool DocumentSession::advanceSearch(int delta) {
     if (searchIndex_ < 0) {
         searchIndex_ += count;
     }
+    ++searchRevision_;
     return true;
 }
 
@@ -217,34 +150,52 @@ AnnotationId DocumentSession::addAnnotation(Annotation annotation) {
     return notes_.add(std::move(annotation));
 }
 
-AnnotationId DocumentSession::addMarkup(AnnotationKind kind, const TextSelection& selection, Color color) {
+AnnotationId DocumentSession::addMarkup(AnnotationKind kind, const TextSelection& selection, Color color,
+                                        float lineWidth) {
     if (selection.quads.empty()) {
         return {};
     }
-    Annotation annotation;
-    annotation.kind = kind;
-    annotation.pageIndex = selection.quads.front().pageIndex;
-    annotation.color = color.a == 0 ? activeStyle().color : color;
-    annotation.quads = {};
-    annotation.bounds = QuadBounds(selection.quads.front().quad);
-    annotation.contents = selection.text;
+    Color resolved = color.a == 0 ? activeStyle().color : color;
+    if (resolved.a == 0) {
+        resolved = DefaultColor(kind);
+    }
+    // A selection that runs across a page break becomes one markup per page; a single
+    // annotation can only live on one page.
+    std::vector<int> pageOrder;
     for (const SelectionQuad& quad : selection.quads) {
-        if (quad.pageIndex != annotation.pageIndex) {
-            continue;
+        if (std::find(pageOrder.begin(), pageOrder.end(), quad.pageIndex) == pageOrder.end()) {
+            pageOrder.push_back(quad.pageIndex);
         }
-        annotation.quads.push_back(quad.quad);
-        const Rect bounds = QuadBounds(quad.quad);
-        const double maxX = std::max(annotation.bounds.x + annotation.bounds.width, bounds.x + bounds.width);
-        const double maxY = std::max(annotation.bounds.y + annotation.bounds.height, bounds.y + bounds.height);
-        annotation.bounds.x = std::min(annotation.bounds.x, bounds.x);
-        annotation.bounds.y = std::min(annotation.bounds.y, bounds.y);
-        annotation.bounds.width = maxX - annotation.bounds.x;
-        annotation.bounds.height = maxY - annotation.bounds.y;
     }
-    if (annotation.color.a == 0) {
-        annotation.color = DefaultColor(kind);
+    AnnotationId first;
+    notes_.beginGroup();
+    for (const int pageIndex : pageOrder) {
+        Annotation annotation;
+        annotation.kind = kind;
+        annotation.pageIndex = pageIndex;
+        annotation.color = resolved;
+        annotation.lineWidth = lineWidth > 0 ? lineWidth : (activeStyle().lineWidth > 0 ? activeStyle().lineWidth : 1.5f);
+        if (const PageGeometry* page = viewport_.geometry(pageIndex)) {
+            annotation.stableKey = page->stableKey;
+        }
+        annotation.contents = selection.text;
+        bool haveBounds = false;
+        for (const SelectionQuad& quad : selection.quads) {
+            if (quad.pageIndex != pageIndex) {
+                continue;
+            }
+            annotation.quads.push_back(quad.quad);
+            const Rect bounds = QuadBounds(quad.quad);
+            annotation.bounds = haveBounds ? annotation.bounds.united(bounds) : bounds;
+            haveBounds = true;
+        }
+        const AnnotationId id = notes_.add(std::move(annotation));
+        if (first.value == 0) {
+            first = id;
+        }
     }
-    return notes_.add(std::move(annotation));
+    notes_.endGroup();
+    return first;
 }
 
 AnnotationId DocumentSession::addShape(AnnotationKind kind, int pageIndex, const PageGeometry& page, Point pageViewA,
@@ -277,7 +228,6 @@ AnnotationId DocumentSession::addShape(AnnotationKind kind, int pageIndex, const
 
 AnnotationId DocumentSession::addTextNote(int pageIndex, const PageGeometry& page, Point pageView,
                                           const std::string& text, Color color, float fontSize) {
-    const Point user = PageViewToUser(page, pageView);
     const ToolStyle style = activeStyle();
     Annotation annotation;
     annotation.kind = AnnotationKind::FreeText;
@@ -294,7 +244,14 @@ AnnotationId DocumentSession::addTextNote(int pageIndex, const PageGeometry& pag
     annotation.contents = text;
     const double width = std::max(120.0, static_cast<double>(annotation.fontSize) * 12.0);
     const double height = std::max(36.0, static_cast<double>(annotation.fontSize) * 3.2);
-    annotation.bounds = Rect{user.x, user.y - height, width, height};
+    // Build the box in page-view space (the tap is its top-left corner on screen) so it
+    // extends right and down whatever the page rotation is.
+    const Size displayed = DisplayedSize(page);
+    const double left = std::clamp(pageView.x, 0.0, std::max(0.0, displayed.width - width));
+    const double top = std::clamp(pageView.y, 0.0, std::max(0.0, displayed.height - height));
+    const Point userA = PageViewToUser(page, Point{left, top});
+    const Point userB = PageViewToUser(page, Point{left + width, top + height});
+    annotation.bounds = BoundsOfPoints(userA, userB);
     return notes_.add(std::move(annotation));
 }
 
@@ -386,41 +343,32 @@ bool DocumentSession::deleteSelectedNote() {
 }
 
 void DocumentSession::sanitizeSelection() {
-    if (selectedNote_.value == 0) {
-        return;
+    if (selectedNote_.value != 0 && notes_.find(selectedNote_) == nullptr) {
+        selectedNote_ = {};
     }
-    for (const Annotation& note : notes_.annotations()) {
-        if (note.id == selectedNote_) {
-            return;
-        }
-    }
-    selectedNote_ = {};
 }
 
 void DocumentSession::eraseAt(int pageIndex, const PageGeometry& page, Point pageView, double radius) {
+    eraseAlong(pageIndex, page, pageView, pageView, radius);
+}
+
+bool DocumentSession::eraseAlong(int pageIndex, const PageGeometry& page, Point from, Point to, double radius) {
+    const std::uint64_t before = notes_.revision();
+    notes_.beginGroup();
     std::vector<AnnotationId> shapes;
     for (const Annotation& note : notes_.annotations()) {
-        if (note.pageIndex == pageIndex && note.kind != AnnotationKind::Ink && HitsNote(note, page, pageView, radius)) {
+        if (note.pageIndex == pageIndex && note.kind != AnnotationKind::Ink &&
+            HitsAnnotationAlong(note, page, from, to, radius)) {
             shapes.push_back(note.id);
         }
     }
     for (const AnnotationId id : shapes) {
         notes_.remove(id);
-        if (selectedNote_ == id) {
-            selectedNote_ = {};
-        }
     }
-    notes_.eraseNear(pageIndex, page, pageView, radius);
-    bool selectedRemains = false;
-    for (const Annotation& note : notes_.annotations()) {
-        if (note.id == selectedNote_) {
-            selectedRemains = true;
-            break;
-        }
-    }
-    if (!selectedRemains) {
-        selectedNote_ = {};
-    }
+    notes_.eraseAlong(pageIndex, page, from, to, radius);
+    notes_.endGroup();
+    sanitizeSelection();
+    return notes_.revision() != before;
 }
 
 }  // namespace pager

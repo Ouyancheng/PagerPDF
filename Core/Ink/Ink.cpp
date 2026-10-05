@@ -10,9 +10,17 @@ namespace {
 constexpr double kMinSegment = 0.001;
 constexpr double kDuplicateEpsilon = 0.06;
 constexpr double kDrawSpacing = 0.7;
-constexpr double kFinishSimplify = 0.16;
+// Below a hundredth of a point nobody can see the difference, so finish() stays lossless.
+constexpr double kFinishSimplify = 0.02;
+constexpr double kFinishForceTolerance = 0.03;
 constexpr float kTaperHead = 10.0f;
 constexpr float kTaperTail = 16.0f;
+// Speeds are in PDF points per second; handwriting moves at roughly 100–400 pt/s.
+constexpr float kThinningStart = 180.0f;
+constexpr float kThinningFull = 1100.0f;
+constexpr float kThinningFloor = 0.8f;
+// Exponential smoothing of per-sample speed so timestamp jitter does not modulate width.
+constexpr float kSpeedSmoothing = 0.35f;
 
 double Distance(Point a, Point b) {
     const double dx = a.x - b.x;
@@ -34,7 +42,8 @@ void AnnotateSpeed(InkSample& sample, const InkSample& previous) {
         sample.speed = previous.speed;
         return;
     }
-    sample.speed = static_cast<float>(Distance(Point{sample.x, sample.y}, Point{previous.x, previous.y}) / dt);
+    const float raw = static_cast<float>(Distance(Point{sample.x, sample.y}, Point{previous.x, previous.y}) / dt);
+    sample.speed = previous.speed + (raw - previous.speed) * kSpeedSmoothing;
 }
 
 bool NearlyDuplicate(const InkSample& a, const InkSample& b) {
@@ -42,16 +51,18 @@ bool NearlyDuplicate(const InkSample& a, const InkSample& b) {
            std::fabs(a.force - b.force) < 0.04f;
 }
 
-float TaperScale(double distanceFromStart, double distanceFromEnd, double total) {
+float Smoothstep(float t) { return t * t * (3 - 2 * t); }
+
+float TaperScale(double distanceFromStart, double distanceFromEnd, double total, RibbonOptions options) {
     float scale = 1;
     if (total > 0.5) {
-        if (distanceFromStart < kTaperHead) {
+        if (options.taperHead && distanceFromStart < kTaperHead) {
             const float t = static_cast<float>(distanceFromStart / kTaperHead);
-            scale = std::min(scale, 0.18f + 0.82f * t * t * (3 - 2 * t));
+            scale = std::min(scale, 0.18f + 0.82f * Smoothstep(t));
         }
-        if (distanceFromEnd < kTaperTail) {
+        if (options.taperTail && distanceFromEnd < kTaperTail) {
             const float t = static_cast<float>(distanceFromEnd / kTaperTail);
-            scale = std::min(scale, 0.10f + 0.90f * t * t * (3 - 2 * t));
+            scale = std::min(scale, 0.10f + 0.90f * Smoothstep(t));
         }
     }
     return scale;
@@ -98,6 +109,16 @@ void AppendDisc(std::vector<Triangle>& triangles, Point center, float radius, in
     }
 }
 
+void OrientCounterClockwise(std::vector<Triangle>& triangles) {
+    for (Triangle& triangle : triangles) {
+        const double cross = (triangle.b.x - triangle.a.x) * (triangle.c.y - triangle.a.y) -
+                             (triangle.b.y - triangle.a.y) * (triangle.c.x - triangle.a.x);
+        if (cross < 0) {
+            std::swap(triangle.b, triangle.c);
+        }
+    }
+}
+
 }  // namespace
 
 float InkWidthForSample(const InkSample& sample, float baseWidth, bool pressure) {
@@ -119,8 +140,9 @@ float InkWidthForSample(const InkSample& sample, float baseWidth, bool pressure)
     }
 
     float speed = 1;
-    if (sample.speed > 8) {
-        speed = ClampFloat(1 / (1 + (sample.speed - 8) * 0.012f), 0.62f, 1);
+    if (sample.speed > kThinningStart) {
+        const float t = ClampFloat((sample.speed - kThinningStart) / (kThinningFull - kThinningStart), 0, 1);
+        speed = 1 - (1 - kThinningFloor) * Smoothstep(t);
     }
 
     return baseWidth * (0.46f + 0.68f * force) * tilt * speed;
@@ -129,7 +151,7 @@ float InkWidthForSample(const InkSample& sample, float baseWidth, bool pressure)
 namespace {
 
 void SimplifyRange(const std::vector<InkSample>& samples, std::size_t start, std::size_t end, double epsilon,
-                   std::vector<char>& keep) {
+                   double forceEpsilon, std::vector<char>& keep) {
     if (end <= start + 1) {
         return;
     }
@@ -138,8 +160,8 @@ void SimplifyRange(const std::vector<InkSample>& samples, std::size_t start, std
     const double dx = b.x - a.x;
     const double dy = b.y - a.y;
     const double length = std::sqrt(dx * dx + dy * dy);
-    double maxDistance = 0;
-    std::size_t maxIndex = start;
+    double worst = 0;
+    std::size_t worstIndex = start;
     for (std::size_t index = start + 1; index < end; ++index) {
         const Point p{samples[index].x, samples[index].y};
         double distance = 0;
@@ -148,15 +170,21 @@ void SimplifyRange(const std::vector<InkSample>& samples, std::size_t start, std
         } else {
             distance = std::abs(dy * p.x - dx * p.y + b.x * a.y - b.y * a.x) / length;
         }
-        if (distance > maxDistance) {
-            maxDistance = distance;
-            maxIndex = index;
+        double score = distance / epsilon;
+        if (std::isfinite(forceEpsilon) && forceEpsilon > 0) {
+            const double t = static_cast<double>(index - start) / static_cast<double>(end - start);
+            const double expected = samples[start].force + (samples[end].force - samples[start].force) * t;
+            score = std::max(score, std::fabs(samples[index].force - expected) / forceEpsilon);
+        }
+        if (score > worst) {
+            worst = score;
+            worstIndex = index;
         }
     }
-    if (maxDistance > epsilon) {
-        keep[maxIndex] = 1;
-        SimplifyRange(samples, start, maxIndex, epsilon, keep);
-        SimplifyRange(samples, maxIndex, end, epsilon, keep);
+    if (worst > 1) {
+        keep[worstIndex] = 1;
+        SimplifyRange(samples, start, worstIndex, epsilon, forceEpsilon, keep);
+        SimplifyRange(samples, worstIndex, end, epsilon, forceEpsilon, keep);
     }
 }
 
@@ -171,7 +199,9 @@ void StrokeBuilder::begin(InkSample sample) {
     committed_.push_back(sample);
 }
 
-void StrokeBuilder::addCoalesced(const std::vector<InkSample>& samples) {
+std::vector<std::size_t> StrokeBuilder::addCoalesced(const std::vector<InkSample>& samples) {
+    std::vector<std::size_t> indices;
+    indices.reserve(samples.size());
     predicted_.clear();
     for (InkSample sample : samples) {
         sample.predicted = false;
@@ -183,11 +213,14 @@ void StrokeBuilder::addCoalesced(const std::vector<InkSample>& samples) {
                 committed_.back().azimuth = sample.azimuth;
                 committed_.back().time = sample.time;
                 committed_.back().speed = sample.speed;
+                indices.push_back(committed_.size() - 1);
                 continue;
             }
         }
         committed_.push_back(sample);
+        indices.push_back(committed_.size() - 1);
     }
+    return indices;
 }
 
 void StrokeBuilder::setPredicted(const std::vector<InkSample>& samples) {
@@ -205,8 +238,21 @@ void StrokeBuilder::setPredicted(const std::vector<InkSample>& samples) {
     }
 }
 
+bool StrokeBuilder::updateSample(std::size_t index, float force, float altitude, float azimuth) {
+    if (!active_ || index >= committed_.size()) {
+        return false;
+    }
+    InkSample& sample = committed_[index];
+    sample.force = force;
+    sample.altitude = altitude;
+    sample.azimuth = azimuth;
+    return true;
+}
+
 std::vector<InkSample> StrokeBuilder::display() const {
-    std::vector<InkSample> all = committed_;
+    std::vector<InkSample> all;
+    all.reserve(committed_.size() + predicted_.size());
+    all.insert(all.end(), committed_.begin(), committed_.end());
     all.insert(all.end(), predicted_.begin(), predicted_.end());
     return all;
 }
@@ -214,7 +260,7 @@ std::vector<InkSample> StrokeBuilder::display() const {
 std::vector<InkSample> StrokeBuilder::finish() {
     active_ = false;
     predicted_.clear();
-    std::vector<InkSample> simplified = SimplifyStroke(SmoothStroke(SmoothStroke(committed_)), kFinishSimplify);
+    std::vector<InkSample> simplified = SimplifyStroke(committed_, kFinishSimplify, kFinishForceTolerance);
     committed_.clear();
     return simplified;
 }
@@ -245,14 +291,14 @@ std::vector<InkSample> SmoothStroke(const std::vector<InkSample>& samples) {
     return smoothed;
 }
 
-std::vector<InkSample> SimplifyStroke(const std::vector<InkSample>& samples, double epsilon) {
-    if (samples.size() < 3) {
+std::vector<InkSample> SimplifyStroke(const std::vector<InkSample>& samples, double epsilon, double forceEpsilon) {
+    if (samples.size() < 3 || epsilon <= 0) {
         return samples;
     }
     std::vector<char> keep(samples.size(), 0);
     keep.front() = 1;
     keep.back() = 1;
-    SimplifyRange(samples, 0, samples.size() - 1, epsilon, keep);
+    SimplifyRange(samples, 0, samples.size() - 1, epsilon, forceEpsilon, keep);
     std::vector<InkSample> simplified;
     for (std::size_t index = 0; index < samples.size(); ++index) {
         if (keep[index]) {
@@ -289,7 +335,7 @@ std::vector<InkSample> ResampleStroke(const std::vector<InkSample>& samples, dou
 }
 
 std::vector<Triangle> BuildRibbon(const std::vector<InkSample>& samples, const PageGeometry& page, float baseWidth,
-                                  bool pressure) {
+                                  bool pressure, RibbonOptions options) {
     std::vector<Triangle> triangles;
     if (samples.empty()) {
         return triangles;
@@ -313,10 +359,11 @@ std::vector<Triangle> BuildRibbon(const std::vector<InkSample>& samples, const P
     }
     if (vertices.size() == 1) {
         AppendDisc(triangles, vertices.front().point, vertices.front().width * 0.5f, 16);
+        OrientCounterClockwise(triangles);
         return triangles;
     }
     for (std::size_t index = 0; index < vertices.size(); ++index) {
-        vertices[index].width *= TaperScale(distances[index], total - distances[index], total);
+        vertices[index].width *= TaperScale(distances[index], total - distances[index], total, options);
     }
     // Smooth widths so pressure noise does not pinch the ribbon.
     if (vertices.size() >= 3) {
@@ -332,6 +379,7 @@ std::vector<Triangle> BuildRibbon(const std::vector<InkSample>& samples, const P
         }
     }
 
+    triangles.reserve(vertices.size() * 2 + 32);
     std::vector<Point> left(vertices.size());
     std::vector<Point> right(vertices.size());
     Point lastNormal{0, 1};
@@ -366,6 +414,7 @@ std::vector<Triangle> BuildRibbon(const std::vector<InkSample>& samples, const P
     }
     AppendDisc(triangles, vertices.front().point, vertices.front().width * 0.5f, 14);
     AppendDisc(triangles, vertices.back().point, vertices.back().width * 0.5f, 14);
+    OrientCounterClockwise(triangles);
     return triangles;
 }
 

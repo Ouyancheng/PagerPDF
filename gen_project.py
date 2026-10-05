@@ -268,8 +268,9 @@ mac_extra = {
     "SUPPORTED_PLATFORMS": "macosx",
     "GENERATE_INFOPLIST_FILE": "NO",
     "LD_RUNPATH_SEARCH_PATHS": "@executable_path/../Frameworks",
-    # -export_dynamic lets the app-hosted test bundle resolve app classes (bundle loader).
-    "OTHER_LDFLAGS": "-framework AppKit -framework PDFKit -framework CoreText -framework CoreGraphics -framework Foundation -framework UniformTypeIdentifiers -framework QuartzCore -Wl,-export_dynamic",
+    # -export_dynamic lets the app-hosted test bundle resolve app classes (bundle loader);
+    # -all_load keeps core objects the app itself never references so tests can use them.
+    "OTHER_LDFLAGS": "-framework AppKit -framework PDFKit -framework CoreText -framework CoreGraphics -framework Foundation -framework UniformTypeIdentifiers -framework QuartzCore -Wl,-export_dynamic -Wl,-all_load",
     # Scheme builds default this to YES, which would hide PagerDocument/PagerDocumentView
     # from the test bundle even with -export_dynamic; keep app symbols visible.
     "GCC_SYMBOLS_PRIVATE_EXTERN": "NO",

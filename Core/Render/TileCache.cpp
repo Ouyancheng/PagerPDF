@@ -1,11 +1,6 @@
 #include "TileCache.hpp"
 #include "TileImage.hpp"
 
-#include <CoreGraphics/CGColorSpace.h>
-#include <CoreGraphics/CGDataProvider.h>
-#include <CoreGraphics/CGImage.h>
-
-#include <algorithm>
 #include <utility>
 
 namespace pager {
@@ -15,11 +10,12 @@ bool TileKey::operator==(const TileKey& other) const {
 }
 
 std::size_t TileKeyHash::operator()(const TileKey& key) const {
-    std::size_t value = static_cast<std::size_t>(key.page) * 1315423911u;
-    value ^= static_cast<std::size_t>(key.scaleBand) << 24;
-    value ^= static_cast<std::size_t>(key.column) << 12;
-    value ^= static_cast<std::size_t>(key.row);
-    return value;
+    std::uint64_t value = static_cast<std::uint32_t>(key.page);
+    value = value * 0x9E3779B97F4A7C15ull + static_cast<std::uint32_t>(key.scaleBand);
+    value = value * 0x9E3779B97F4A7C15ull + static_cast<std::uint32_t>(key.column);
+    value = value * 0x9E3779B97F4A7C15ull + static_cast<std::uint32_t>(key.row);
+    value ^= value >> 29;
+    return static_cast<std::size_t>(value);
 }
 
 TileCache::TileCache(std::size_t byteCap) : byteCap_(byteCap) {}
@@ -30,59 +26,51 @@ void TileCache::setByteCap(std::size_t byteCap) {
 }
 
 void TileCache::clear() {
-    order_.clear();
-    images_.clear();
+    entries_.clear();
+    index_.clear();
     bytes_ = 0;
 }
 
 void TileCache::insert(TileImage image) {
-    const auto existing = std::find(order_.begin(), order_.end(), image.key);
-    if (existing != order_.end()) {
-        const auto index = static_cast<std::size_t>(existing - order_.begin());
-        bytes_ -= images_[index].bgra.size();
-        images_.erase(images_.begin() + static_cast<std::ptrdiff_t>(index));
-        order_.erase(existing);
+    const auto existing = index_.find(image.key);
+    if (existing != index_.end()) {
+        bytes_ -= existing->second->byteCount();
+        entries_.erase(existing->second);
+        index_.erase(existing);
     }
-    bytes_ += image.bgra.size();
-    order_.push_back(image.key);
-    images_.push_back(std::move(image));
+    bytes_ += image.byteCount();
+    entries_.push_front(std::move(image));
+    index_[entries_.front().key] = entries_.begin();
     evictIfNeeded();
 }
 
 const TileImage* TileCache::find(const TileKey& key) const {
-    const auto found = std::find(order_.begin(), order_.end(), key);
-    if (found == order_.end()) {
+    const auto found = index_.find(key);
+    return found == index_.end() ? nullptr : &*found->second;
+}
+
+const TileImage* TileCache::touch(const TileKey& key) {
+    const auto found = index_.find(key);
+    if (found == index_.end()) {
         return nullptr;
     }
-    return &images_[static_cast<std::size_t>(found - order_.begin())];
+    entries_.splice(entries_.begin(), entries_, found->second);
+    return &entries_.front();
 }
 
 void TileCache::evictIfNeeded() {
-    while (bytes_ > byteCap_ && !order_.empty()) {
-        bytes_ -= images_.front().bgra.size();
-        order_.erase(order_.begin());
-        images_.erase(images_.begin());
+    // Never evict the newest entry: a single tile larger than the cap must still be usable.
+    while (bytes_ > byteCap_ && entries_.size() > 1) {
+        const TileImage& oldest = entries_.back();
+        bytes_ -= oldest.byteCount();
+        index_.erase(oldest.key);
+        entries_.pop_back();
     }
 }
 
 CGImageRef CreateTileCGImage(const TileImage& tile) {
-    if (tile.bgra.empty() || tile.width <= 0 || tile.height <= 0) {
-        return nullptr;
-    }
-    CFDataRef data = CFDataCreate(kCFAllocatorDefault, tile.bgra.data(), static_cast<CFIndex>(tile.bgra.size()));
-    if (data == nullptr) {
-        return nullptr;
-    }
-    CGDataProviderRef provider = CGDataProviderCreateWithCFData(data);
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
-    CGImageRef image = CGImageCreate(static_cast<size_t>(tile.width), static_cast<size_t>(tile.height), 8, 32,
-                                     static_cast<size_t>(tile.bytesPerRow), colorSpace,
-                                     kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little, provider, nullptr,
-                                     false, kCGRenderingIntentDefault);
-    CGColorSpaceRelease(colorSpace);
-    CGDataProviderRelease(provider);
-    CFRelease(data);
-    return image;
+    CGImageRef image = tile.image.get();
+    return image == nullptr ? nullptr : CGImageRetain(image);
 }
 
 }  // namespace pager

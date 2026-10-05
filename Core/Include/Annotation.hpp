@@ -67,7 +67,13 @@ struct Annotation {
     Point lineEnd;
     std::vector<InkSample> samples;
     bool pressure = false;
+    // Ends produced by the eraser are cut square-ish (round cap) instead of tapered, so a
+    // partially erased stroke does not grow pointed tips in the middle of a word.
+    bool cutStart = false;
+    bool cutEnd = false;
 };
+
+bool SameContent(const Annotation& a, const Annotation& b);
 
 const char* AnnotationKindName(AnnotationKind kind);
 bool AnnotationKindFromName(const std::string& name, AnnotationKind* kind);

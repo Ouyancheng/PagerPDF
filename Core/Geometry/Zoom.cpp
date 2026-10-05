@@ -13,6 +13,10 @@ int ScaleKeyForZoom(double scale) {
     return static_cast<int>(std::lround(ClampScale(scale) * 100.0));
 }
 
+double ZoomForScaleKey(int key) {
+    return std::max(0.05, key / 100.0);
+}
+
 double LayerContentsScale(double screenScale, double zoom) {
     const double screen = screenScale <= 0 ? 1 : screenScale;
     const double desired = std::max(0.05, ClampScale(zoom) * screen);

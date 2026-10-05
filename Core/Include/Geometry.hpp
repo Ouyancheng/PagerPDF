@@ -24,6 +24,11 @@ struct Rect {
     bool contains(Point p) const;
     bool intersects(const Rect& other) const;
     Point center() const;
+    bool empty() const { return width <= 0 || height <= 0; }
+    Rect inset(double dx, double dy) const { return Rect{x + dx, y + dy, width - dx * 2, height - dy * 2}; }
+    // Union that treats an empty rect as the identity.
+    Rect united(const Rect& other) const;
+    Rect intersection(const Rect& other) const;
 };
 
 struct Quad {

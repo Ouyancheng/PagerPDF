@@ -21,6 +21,9 @@ double ClampScale(double scale);
 // Hundredths of the clamped scale, used as the tile-cache identity so a 1.3x view
 // never reuses rasters built for 1.0x.
 int ScaleKeyForZoom(double scale);
+// The zoom a scale key stands for. Tiles must be rasterized *and* placed with this value,
+// never the raw zoom, or neighbouring tiles drift apart.
+double ZoomForScaleKey(int key);
 // Display density for CATiledLayer.contentsScale: zoom × screen, capped so a
 // long document does not hit the "bogus layer size" limit. Deeper zooms use LOD.
 double LayerContentsScale(double screenScale, double zoom);

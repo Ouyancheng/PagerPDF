@@ -2,11 +2,15 @@
 
 #import "NoteArchive.h"
 
+#include <memory>
+
 namespace {
+
+constexpr double kSaveDelay = 0.4;
 
 void AppendOutline(const pager::OutlineItem &item, NSInteger depth, NSMutableArray<NSDictionary *> *output) {
     [output addObject:@{
-        @"title" : @(item.title.c_str()),
+        @"title" : @(item.title.c_str()) ?: @"",
         @"page" : @(item.pageIndex),
         @"x" : @(item.point.x),
         @"y" : @(item.point.y),
@@ -25,6 +29,9 @@ void AppendOutline(const pager::OutlineItem &item, NSInteger depth, NSMutableArr
     NSData *_originalData;
     NSMutableArray<NSDictionary *> *_outline;
     BOOL _accessing;
+    dispatch_queue_t _saveQueue;
+    BOOL _saveScheduled;
+    std::uint64_t _savedRevision;
 }
 
 - (instancetype)initWithFileURL:(NSURL *)url {
@@ -34,8 +41,20 @@ void AppendOutline(const pager::OutlineItem &item, NSInteger depth, NSMutableArr
         _accessing = [url startAccessingSecurityScopedResource];
         _source = [[PDFKitPageSource alloc] init];
         _outline = [NSMutableArray array];
+        _saveQueue = dispatch_queue_create("pager.notes.save", DISPATCH_QUEUE_SERIAL);
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(applicationDidEnterBackground:)
+                                                     name:UIApplicationDidEnterBackgroundNotification
+                                                   object:nil];
     }
     return self;
+}
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    // Render threads borrow _source's raster source; they must be joined before ivars
+    // (including _source) are destroyed.
+    _session.viewport().stop();
 }
 
 - (pager::DocumentSession &)session {
@@ -66,10 +85,12 @@ void AppendOutline(const pager::OutlineItem &item, NSInteger depth, NSMutableArr
         pages.push_back([_source geometryAtIndex:index]);
     }
     _session.viewport().setPages(std::move(pages));
+    _session.viewport().setSource(_source.rasterSource);
     _session.imported = [_source importAnnotations];
     pager::NoteDocument loaded;
     [PagerNoteArchive loadDocument:loaded pdfURL:self.fileURL error:nil];
     _session.notes().replaceAll(loaded.annotations());
+    _savedRevision = _session.notes().revision();
     _outline = [NSMutableArray array];
     for (const pager::OutlineItem &item : [_source outlineItems]) {
         AppendOutline(item, 0, _outline);
@@ -81,11 +102,47 @@ void AppendOutline(const pager::OutlineItem &item, NSInteger depth, NSMutableArr
     return _originalData ?: [NSData data];
 }
 
+// Coalesces bursts of edits into one write, encoded and written off the main thread.
 - (void)saveNotes {
-    [PagerNoteArchive saveDocument:_session.notes() pdfURL:self.fileURL error:nil];
+    if (_saveScheduled) {
+        return;
+    }
+    _saveScheduled = YES;
+    __weak PadDocument *weakSelf = self;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, static_cast<int64_t>(kSaveDelay * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{
+                       [weakSelf flushNotes];
+                   });
+}
+
+- (void)flushNotes {
+    _saveScheduled = NO;
+    const std::uint64_t revision = _session.notes().revision();
+    if (revision == _savedRevision || self.fileURL == nil) {
+        return;
+    }
+    _savedRevision = revision;
+    auto copy = std::make_shared<std::vector<pager::Annotation>>(_session.notes().annotations());
+    NSURL *url = self.fileURL;
+    dispatch_async(_saveQueue, ^{
+        [PagerNoteArchive saveAnnotations:*copy pdfURL:url error:nil];
+    });
+}
+
+- (void)flushNotesAndWait {
+    [self flushNotes];
+    dispatch_sync(_saveQueue, ^{
+                  });
+}
+
+- (void)applicationDidEnterBackground:(NSNotification *)notification {
+    [self flushNotesAndWait];
 }
 
 - (void)closeWithCompletionHandler:(void (^)(BOOL))completionHandler {
+    [self flushNotesAndWait];
+    [_source cancelSearch];
+    _session.viewport().stop();
     if (_accessing) {
         [self.fileURL stopAccessingSecurityScopedResource];
         _accessing = NO;

@@ -7,135 +7,155 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A1000000000000000000102B /* PBXBuildFile */ = {
+		A10000000000000000001030 /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
 			fileRef = "A10000000000000000001001";
 		};
-		A1000000000000000000102C /* PBXBuildFile */ = {
+		A10000000000000000001031 /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
 			fileRef = "A10000000000000000001002";
 		};
-		A1000000000000000000102D /* PBXBuildFile */ = {
+		A10000000000000000001032 /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
 			fileRef = "A10000000000000000001003";
 		};
-		A1000000000000000000102E /* PBXBuildFile */ = {
+		A10000000000000000001033 /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
 			fileRef = "A10000000000000000001004";
 		};
-		A1000000000000000000102F /* PBXBuildFile */ = {
+		A10000000000000000001034 /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
 			fileRef = "A10000000000000000001005";
 		};
-		A10000000000000000001030 /* PBXBuildFile */ = {
+		A10000000000000000001035 /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
 			fileRef = "A10000000000000000001006";
 		};
-		A10000000000000000001031 /* PBXBuildFile */ = {
+		A10000000000000000001036 /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
 			fileRef = "A10000000000000000001007";
 		};
-		A10000000000000000001032 /* PBXBuildFile */ = {
+		A10000000000000000001037 /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
 			fileRef = "A10000000000000000001008";
 		};
-		A10000000000000000001033 /* PBXBuildFile */ = {
+		A10000000000000000001038 /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
 			fileRef = "A10000000000000000001009";
 		};
-		A10000000000000000001034 /* PBXBuildFile */ = {
+		A10000000000000000001039 /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
 			fileRef = "A1000000000000000000100A";
 		};
-		A10000000000000000001035 /* PBXBuildFile */ = {
+		A1000000000000000000103A /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
 			fileRef = "A1000000000000000000100B";
 		};
-		A10000000000000000001036 /* PBXBuildFile */ = {
+		A1000000000000000000103B /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
 			fileRef = "A1000000000000000000100C";
 		};
-		A10000000000000000001037 /* PBXBuildFile */ = {
+		A1000000000000000000103C /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
 			fileRef = "A1000000000000000000100D";
 		};
-		A10000000000000000001038 /* PBXBuildFile */ = {
+		A1000000000000000000103D /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
 			fileRef = "A1000000000000000000100E";
 		};
-		A10000000000000000001039 /* PBXBuildFile */ = {
+		A1000000000000000000103E /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
 			fileRef = "A1000000000000000000100F";
 		};
-		A1000000000000000000103A /* PBXBuildFile */ = {
+		A1000000000000000000103F /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
 			fileRef = "A10000000000000000001010";
 		};
-		A1000000000000000000103B /* PBXBuildFile */ = {
+		A10000000000000000001040 /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
 			fileRef = "A10000000000000000001011";
 		};
-		A1000000000000000000103C /* PBXBuildFile */ = {
+		A10000000000000000001041 /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
 			fileRef = "A10000000000000000001012";
 		};
-		A1000000000000000000103D /* PBXBuildFile */ = {
+		A10000000000000000001042 /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
 			fileRef = "A10000000000000000001013";
 		};
-		A1000000000000000000103E /* PBXBuildFile */ = {
+		A10000000000000000001043 /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
 			fileRef = "A10000000000000000001014";
 		};
-		A1000000000000000000103F /* PBXBuildFile */ = {
+		A10000000000000000001044 /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
 			fileRef = "A10000000000000000001015";
 		};
-		A10000000000000000001040 /* PBXBuildFile */ = {
+		A10000000000000000001045 /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
 			fileRef = "A10000000000000000001016";
 		};
-		A10000000000000000001041 /* PBXBuildFile */ = {
+		A10000000000000000001046 /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
 			fileRef = "A10000000000000000001017";
 		};
-		A10000000000000000001042 /* PBXBuildFile */ = {
+		A10000000000000000001047 /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
-			fileRef = "A10000000000000000001025";
+			fileRef = "A10000000000000000001018";
 		};
-		A10000000000000000001043 /* PBXBuildFile */ = {
+		A10000000000000000001048 /* PBXBuildFile */ = {
 			isa = PBXBuildFile;
-			fileRef = "A10000000000000000001025";
+			fileRef = "A10000000000000000001019";
+		};
+		A10000000000000000001049 /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A1000000000000000000101A";
+		};
+		A1000000000000000000104A /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A1000000000000000000101B";
+		};
+		A1000000000000000000104B /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A1000000000000000000101C";
+		};
+		A1000000000000000000104C /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A1000000000000000000102A";
+		};
+		A1000000000000000000104D /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A1000000000000000000102A";
 		};
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		A10000000000000000001051 /* PBXContainerItemProxy */ = {
+		A1000000000000000000105B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = "A1000000000000000000104C";
+			containerPortal = "A10000000000000000001056";
 			proxyType = 1;
-			remoteGlobalIDString = "A1000000000000000000104D";
+			remoteGlobalIDString = "A10000000000000000001057";
 			remoteInfo = "PagerCore";
 		};
-		A10000000000000000001053 /* PBXContainerItemProxy */ = {
+		A1000000000000000000105D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = "A1000000000000000000104C";
+			containerPortal = "A10000000000000000001056";
 			proxyType = 1;
-			remoteGlobalIDString = "A1000000000000000000104D";
+			remoteGlobalIDString = "A10000000000000000001057";
 			remoteInfo = "PagerCorePad";
 		};
-		A10000000000000000001055 /* PBXContainerItemProxy */ = {
+		A1000000000000000000105F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = "A1000000000000000000104C";
+			containerPortal = "A10000000000000000001056";
 			proxyType = 1;
-			remoteGlobalIDString = "A1000000000000000000104D";
+			remoteGlobalIDString = "A10000000000000000001057";
 			remoteInfo = "PagerCoreTest";
 		};
-		A10000000000000000001057 /* PBXContainerItemProxy */ = {
+		A10000000000000000001061 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = "A1000000000000000000104C";
+			containerPortal = "A10000000000000000001056";
 			proxyType = 1;
-			remoteGlobalIDString = "A1000000000000000000104E";
+			remoteGlobalIDString = "A10000000000000000001058";
 			remoteInfo = "PagerMac";
 		};
 /* End PBXContainerItemProxy section */
@@ -150,91 +170,91 @@
 		A10000000000000000001002 /* PBXFileReference */ = {
 			isa = PBXFileReference;
 			lastKnownFileType = "sourcecode.cpp.cpp";
-			path = "NoteDocument.cpp";
+			path = "AnnotationGeometry.cpp";
 			sourceTree = "<group>";
 		};
 		A10000000000000000001003 /* PBXFileReference */ = {
 			isa = PBXFileReference;
-			lastKnownFileType = "sourcecode.cpp.objcpp";
-			path = "NoteArchive.mm";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+			path = "NoteDocument.cpp";
 			sourceTree = "<group>";
 		};
 		A10000000000000000001004 /* PBXFileReference */ = {
 			isa = PBXFileReference;
 			lastKnownFileType = "sourcecode.cpp.objcpp";
-			path = "OverlayRenderer.mm";
+			path = "AnnotationRasterizer.mm";
 			sourceTree = "<group>";
 		};
 		A10000000000000000001005 /* PBXFileReference */ = {
 			isa = PBXFileReference;
 			lastKnownFileType = "sourcecode.cpp.objcpp";
-			path = "PDFKitPageSource.mm";
+			path = "CanvasController.mm";
 			sourceTree = "<group>";
 		};
 		A10000000000000000001006 /* PBXFileReference */ = {
 			isa = PBXFileReference;
-			lastKnownFileType = "sourcecode.cpp.cpp";
-			path = "Geometry.cpp";
+			lastKnownFileType = "sourcecode.cpp.objcpp";
+			path = "NoteArchive.mm";
 			sourceTree = "<group>";
 		};
 		A10000000000000000001007 /* PBXFileReference */ = {
 			isa = PBXFileReference;
-			lastKnownFileType = "sourcecode.cpp.cpp";
-			path = "Layout.cpp";
+			lastKnownFileType = "sourcecode.cpp.objcpp";
+			path = "OverlayRenderer.mm";
 			sourceTree = "<group>";
 		};
 		A10000000000000000001008 /* PBXFileReference */ = {
 			isa = PBXFileReference;
-			lastKnownFileType = "sourcecode.cpp.cpp";
-			path = "Zoom.cpp";
+			lastKnownFileType = "sourcecode.cpp.objcpp";
+			path = "PDFKitPageSource.mm";
 			sourceTree = "<group>";
 		};
 		A10000000000000000001009 /* PBXFileReference */ = {
 			isa = PBXFileReference;
 			lastKnownFileType = "sourcecode.cpp.cpp";
-			path = "Ink.cpp";
+			path = "Geometry.cpp";
 			sourceTree = "<group>";
 		};
 		A1000000000000000000100A /* PBXFileReference */ = {
 			isa = PBXFileReference;
 			lastKnownFileType = "sourcecode.cpp.cpp";
-			path = "TileCache.cpp";
+			path = "Layout.cpp";
 			sourceTree = "<group>";
 		};
 		A1000000000000000000100B /* PBXFileReference */ = {
 			isa = PBXFileReference;
 			lastKnownFileType = "sourcecode.cpp.cpp";
-			path = "Viewport.cpp";
+			path = "Zoom.cpp";
 			sourceTree = "<group>";
 		};
 		A1000000000000000000100C /* PBXFileReference */ = {
 			isa = PBXFileReference;
 			lastKnownFileType = "sourcecode.cpp.cpp";
-			path = "DocumentSession.cpp";
+			path = "Ink.cpp";
 			sourceTree = "<group>";
 		};
 		A1000000000000000000100D /* PBXFileReference */ = {
 			isa = PBXFileReference;
-			lastKnownFileType = "sourcecode.cpp.objcpp";
-			path = "AppDelegate.mm";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+			path = "TileCache.cpp";
 			sourceTree = "<group>";
 		};
 		A1000000000000000000100E /* PBXFileReference */ = {
 			isa = PBXFileReference;
-			lastKnownFileType = "sourcecode.cpp.objcpp";
-			path = "PagerDocument.mm";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+			path = "Viewport.cpp";
 			sourceTree = "<group>";
 		};
 		A1000000000000000000100F /* PBXFileReference */ = {
 			isa = PBXFileReference;
-			lastKnownFileType = "sourcecode.cpp.objcpp";
-			path = "PagerDocumentView.mm";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+			path = "DocumentSession.cpp";
 			sourceTree = "<group>";
 		};
 		A10000000000000000001010 /* PBXFileReference */ = {
 			isa = PBXFileReference;
-			lastKnownFileType = "sourcecode.cpp.objcpp";
-			path = "main.mm";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+			path = "ToolPalette.cpp";
 			sourceTree = "<group>";
 		};
 		A10000000000000000001011 /* PBXFileReference */ = {
@@ -246,73 +266,103 @@
 		A10000000000000000001012 /* PBXFileReference */ = {
 			isa = PBXFileReference;
 			lastKnownFileType = "sourcecode.cpp.objcpp";
-			path = "PadCanvasView.mm";
+			path = "PagerCanvasView.mm";
 			sourceTree = "<group>";
 		};
 		A10000000000000000001013 /* PBXFileReference */ = {
 			isa = PBXFileReference;
 			lastKnownFileType = "sourcecode.cpp.objcpp";
-			path = "PadDocument.mm";
+			path = "PagerDocument.mm";
 			sourceTree = "<group>";
 		};
 		A10000000000000000001014 /* PBXFileReference */ = {
 			isa = PBXFileReference;
 			lastKnownFileType = "sourcecode.cpp.objcpp";
-			path = "SceneDelegate.mm";
+			path = "PagerWindowController.mm";
 			sourceTree = "<group>";
 		};
 		A10000000000000000001015 /* PBXFileReference */ = {
 			isa = PBXFileReference;
 			lastKnownFileType = "sourcecode.cpp.objcpp";
-			path = "ViewerViewController.mm";
+			path = "main.mm";
 			sourceTree = "<group>";
 		};
 		A10000000000000000001016 /* PBXFileReference */ = {
 			isa = PBXFileReference;
 			lastKnownFileType = "sourcecode.cpp.objcpp";
-			path = "main.mm";
+			path = "AppDelegate.mm";
 			sourceTree = "<group>";
 		};
 		A10000000000000000001017 /* PBXFileReference */ = {
 			isa = PBXFileReference;
 			lastKnownFileType = "sourcecode.cpp.objcpp";
-			path = "PagerCoreTests.mm";
+			path = "PadCanvasView.mm";
 			sourceTree = "<group>";
 		};
 		A10000000000000000001018 /* PBXFileReference */ = {
 			isa = PBXFileReference;
-			lastKnownFileType = "text.plist.xml";
-			path = "Info.plist";
+			lastKnownFileType = "sourcecode.cpp.objcpp";
+			path = "PadDocument.mm";
 			sourceTree = "<group>";
 		};
 		A10000000000000000001019 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.objcpp";
+			path = "SceneDelegate.mm";
+			sourceTree = "<group>";
+		};
+		A1000000000000000000101A /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.objcpp";
+			path = "ViewerViewController.mm";
+			sourceTree = "<group>";
+		};
+		A1000000000000000000101B /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.objcpp";
+			path = "main.mm";
+			sourceTree = "<group>";
+		};
+		A1000000000000000000101C /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.objcpp";
+			path = "PagerCoreTests.mm";
+			sourceTree = "<group>";
+		};
+		A1000000000000000000101D /* PBXFileReference */ = {
 			isa = PBXFileReference;
 			lastKnownFileType = "text.plist.xml";
 			path = "Info.plist";
 			sourceTree = "<group>";
 		};
-		A10000000000000000001025 /* PBXFileReference */ = {
+		A1000000000000000000101E /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "text.plist.xml";
+			path = "Info.plist";
+			sourceTree = "<group>";
+		};
+		A1000000000000000000102A /* PBXFileReference */ = {
 			isa = PBXFileReference;
 			explicitFileType = "archive.ar";
 			includeInIndex = 0;
 			path = "libPagerCore.a";
 			sourceTree = "BUILT_PRODUCTS_DIR";
 		};
-		A10000000000000000001026 /* PBXFileReference */ = {
+		A1000000000000000000102B /* PBXFileReference */ = {
 			isa = PBXFileReference;
 			explicitFileType = "wrapper.application";
 			includeInIndex = 0;
 			path = "PagerMac.app";
 			sourceTree = "BUILT_PRODUCTS_DIR";
 		};
-		A10000000000000000001027 /* PBXFileReference */ = {
+		A1000000000000000000102C /* PBXFileReference */ = {
 			isa = PBXFileReference;
 			explicitFileType = "wrapper.application";
 			includeInIndex = 0;
 			path = "PagerPad.app";
 			sourceTree = "BUILT_PRODUCTS_DIR";
 		};
-		A10000000000000000001028 /* PBXFileReference */ = {
+		A1000000000000000000102D /* PBXFileReference */ = {
 			isa = PBXFileReference;
 			explicitFileType = "wrapper.cfbundle";
 			includeInIndex = 0;
@@ -322,30 +372,30 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		A1000000000000000000104B /* PBXFrameworksBuildPhase */ = {
+		A10000000000000000001055 /* PBXFrameworksBuildPhase */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		A10000000000000000001048 /* PBXFrameworksBuildPhase */ = {
+		A10000000000000000001052 /* PBXFrameworksBuildPhase */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				"A10000000000000000001042",
+				"A1000000000000000000104C",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		A10000000000000000001049 /* PBXFrameworksBuildPhase */ = {
+		A10000000000000000001053 /* PBXFrameworksBuildPhase */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				"A10000000000000000001043",
+				"A1000000000000000000104D",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		A1000000000000000000104A /* PBXFrameworksBuildPhase */ = {
+		A10000000000000000001054 /* PBXFrameworksBuildPhase */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -355,31 +405,34 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		A1000000000000000000101A /* PBXGroup */ = {
+		A10000000000000000001021 /* PBXGroup */ = {
 			isa = PBXGroup;
 			children = (
 				"A10000000000000000001001",
 				"A10000000000000000001002",
+				"A10000000000000000001003",
 			);
 			path = "Annotations";
 			sourceTree = "<group>";
 		};
-		A1000000000000000000101B /* PBXGroup */ = {
+		A10000000000000000001024 /* PBXGroup */ = {
 			isa = PBXGroup;
 			children = (
-				"A10000000000000000001003",
 				"A10000000000000000001004",
 				"A10000000000000000001005",
+				"A10000000000000000001006",
+				"A10000000000000000001007",
+				"A10000000000000000001008",
 			);
 			path = "Bridge";
 			sourceTree = "<group>";
 		};
-		A1000000000000000000101D /* PBXGroup */ = {
+		A10000000000000000001025 /* PBXGroup */ = {
 			isa = PBXGroup;
 			children = (
-				"A10000000000000000001006",
-				"A10000000000000000001007",
-				"A10000000000000000001008",
+				"A10000000000000000001009",
+				"A1000000000000000000100A",
+				"A1000000000000000000100B",
 			);
 			path = "Geometry";
 			sourceTree = "<group>";
@@ -387,114 +440,116 @@
 		A1000000000000000000101F /* PBXGroup */ = {
 			isa = PBXGroup;
 			children = (
-				"A10000000000000000001009",
-			);
-			path = "Ink";
-			sourceTree = "<group>";
-		};
-		A10000000000000000001020 /* PBXGroup */ = {
-			isa = PBXGroup;
-			children = (
-				"A1000000000000000000100A",
-				"A1000000000000000000100B",
-			);
-			path = "Render";
-			sourceTree = "<group>";
-		};
-		A1000000000000000000101E /* PBXGroup */ = {
-			isa = PBXGroup;
-			children = (
 				"A1000000000000000000100C",
 			);
-			path = "Session";
-			sourceTree = "<group>";
-		};
-		A1000000000000000000101C /* PBXGroup */ = {
-			isa = PBXGroup;
-			children = (
-				"A1000000000000000000100D",
-				"A10000000000000000001018",
-				"A10000000000000000001010",
-				"A1000000000000000000100E",
-				"A1000000000000000000100F",
-			);
-			path = "Mac";
-			sourceTree = "<group>";
-		};
-		A10000000000000000001021 /* PBXGroup */ = {
-			isa = PBXGroup;
-			children = (
-				"A10000000000000000001011",
-				"A10000000000000000001019",
-				"A10000000000000000001016",
-				"A10000000000000000001012",
-				"A10000000000000000001013",
-				"A10000000000000000001014",
-				"A10000000000000000001015",
-			);
-			path = "Pad";
-			sourceTree = "<group>";
-		};
-		A10000000000000000001023 /* PBXGroup */ = {
-			isa = PBXGroup;
-			children = (
-				"A10000000000000000001017",
-			);
-			path = "Tests";
+			path = "Ink";
 			sourceTree = "<group>";
 		};
 		A10000000000000000001022 /* PBXGroup */ = {
 			isa = PBXGroup;
 			children = (
-				"A1000000000000000000101A",
-				"A1000000000000000000101B",
-				"A1000000000000000000101D",
-				"A1000000000000000000101F",
-				"A10000000000000000001020",
-				"A1000000000000000000101E",
+				"A1000000000000000000100D",
+				"A1000000000000000000100E",
 			);
-			path = "Core";
+			path = "Render";
 			sourceTree = "<group>";
 		};
-		A10000000000000000001024 /* PBXGroup */ = {
+		A10000000000000000001026 /* PBXGroup */ = {
 			isa = PBXGroup;
 			children = (
-				"A1000000000000000000101C",
-				"A10000000000000000001021",
+				"A1000000000000000000100F",
+				"A10000000000000000001010",
 			);
-			path = "Platform";
+			path = "Session";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001023 /* PBXGroup */ = {
+			isa = PBXGroup;
+			children = (
+				"A10000000000000000001011",
+				"A1000000000000000000101D",
+				"A10000000000000000001015",
+				"A10000000000000000001012",
+				"A10000000000000000001013",
+				"A10000000000000000001014",
+			);
+			path = "Mac";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001020 /* PBXGroup */ = {
+			isa = PBXGroup;
+			children = (
+				"A10000000000000000001016",
+				"A1000000000000000000101E",
+				"A1000000000000000000101B",
+				"A10000000000000000001017",
+				"A10000000000000000001018",
+				"A10000000000000000001019",
+				"A1000000000000000000101A",
+			);
+			path = "Pad";
 			sourceTree = "<group>";
 		};
 		A10000000000000000001029 /* PBXGroup */ = {
 			isa = PBXGroup;
 			children = (
+				"A1000000000000000000101C",
+			);
+			path = "Tests";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001027 /* PBXGroup */ = {
+			isa = PBXGroup;
+			children = (
+				"A10000000000000000001021",
+				"A10000000000000000001024",
 				"A10000000000000000001025",
+				"A1000000000000000000101F",
+				"A10000000000000000001022",
 				"A10000000000000000001026",
-				"A10000000000000000001027",
-				"A10000000000000000001028",
+			);
+			path = "Core";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001028 /* PBXGroup */ = {
+			isa = PBXGroup;
+			children = (
+				"A10000000000000000001023",
+				"A10000000000000000001020",
+			);
+			path = "Platform";
+			sourceTree = "<group>";
+		};
+		A1000000000000000000102E /* PBXGroup */ = {
+			isa = PBXGroup;
+			children = (
+				"A1000000000000000000102A",
+				"A1000000000000000000102B",
+				"A1000000000000000000102C",
+				"A1000000000000000000102D",
 			);
 			name = "Products";
 			sourceTree = "<group>";
 		};
-		A1000000000000000000102A /* PBXGroup */ = {
+		A1000000000000000000102F /* PBXGroup */ = {
 			isa = PBXGroup;
 			children = (
-				"A10000000000000000001022",
-				"A10000000000000000001024",
-				"A10000000000000000001023",
+				"A10000000000000000001027",
+				"A10000000000000000001028",
 				"A10000000000000000001029",
+				"A1000000000000000000102E",
 			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A1000000000000000000104D /* PBXNativeTarget */ = {
+		A10000000000000000001057 /* PBXNativeTarget */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = "A10000000000000000001059";
+			buildConfigurationList = "A10000000000000000001063";
 			buildPhases = (
-				"A10000000000000000001044",
-				"A1000000000000000000104B",
+				"A1000000000000000000104E",
+				"A10000000000000000001055",
 			);
 			buildRules = (
 			);
@@ -502,71 +557,71 @@
 			);
 			name = "PagerCore";
 			productName = "PagerCore";
-			productReference = "A10000000000000000001025";
+			productReference = "A1000000000000000000102A";
 			productType = "com.apple.product-type.library.static";
 		};
-		A1000000000000000000104E /* PBXNativeTarget */ = {
+		A10000000000000000001058 /* PBXNativeTarget */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = "A1000000000000000000105A";
+			buildConfigurationList = "A10000000000000000001064";
 			buildPhases = (
-				"A10000000000000000001045",
-				"A10000000000000000001048",
+				"A1000000000000000000104F",
+				"A10000000000000000001052",
 			);
 			buildRules = (
 			);
 			dependencies = (
-				"A10000000000000000001052",
+				"A1000000000000000000105C",
 			);
 			name = "PagerMac";
 			productName = "PagerMac";
-			productReference = "A10000000000000000001026";
+			productReference = "A1000000000000000000102B";
 			productType = "com.apple.product-type.application";
 		};
-		A1000000000000000000104F /* PBXNativeTarget */ = {
+		A10000000000000000001059 /* PBXNativeTarget */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = "A1000000000000000000105B";
+			buildConfigurationList = "A10000000000000000001065";
 			buildPhases = (
-				"A10000000000000000001046",
-				"A10000000000000000001049",
+				"A10000000000000000001050",
+				"A10000000000000000001053",
 			);
 			buildRules = (
 			);
 			dependencies = (
-				"A10000000000000000001054",
+				"A1000000000000000000105E",
 			);
 			name = "PagerPad";
 			productName = "PagerPad";
-			productReference = "A10000000000000000001027";
+			productReference = "A1000000000000000000102C";
 			productType = "com.apple.product-type.application";
 		};
-		A10000000000000000001050 /* PBXNativeTarget */ = {
+		A1000000000000000000105A /* PBXNativeTarget */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = "A1000000000000000000105C";
+			buildConfigurationList = "A10000000000000000001066";
 			buildPhases = (
-				"A10000000000000000001047",
-				"A1000000000000000000104A",
+				"A10000000000000000001051",
+				"A10000000000000000001054",
 			);
 			buildRules = (
 			);
 			dependencies = (
-				"A10000000000000000001056",
-				"A10000000000000000001058",
+				"A10000000000000000001060",
+				"A10000000000000000001062",
 			);
 			name = "PagerCoreTests";
 			productName = "PagerCoreTests";
-			productReference = "A10000000000000000001028";
+			productReference = "A1000000000000000000102D";
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		A1000000000000000000104C /* PBXProject */ = {
+		A10000000000000000001056 /* PBXProject */ = {
 			isa = PBXProject;
 			attributes = {
 				"BuildIndependentTargetsInParallel" = 1;
 				"LastUpgradeCheck" = 1600;
 			};
-			buildConfigurationList = "A1000000000000000000105D";
+			buildConfigurationList = "A10000000000000000001067";
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = "en";
 			hasScannedForEncodings = 0;
@@ -574,29 +629,24 @@
 				"en",
 				"Base",
 			);
-			mainGroup = "A1000000000000000000102A";
-			productRefGroup = "A10000000000000000001029";
+			mainGroup = "A1000000000000000000102F";
+			productRefGroup = "A1000000000000000000102E";
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				"A1000000000000000000104D",
-				"A1000000000000000000104E",
-				"A1000000000000000000104F",
-				"A10000000000000000001050",
+				"A10000000000000000001057",
+				"A10000000000000000001058",
+				"A10000000000000000001059",
+				"A1000000000000000000105A",
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		A10000000000000000001044 /* PBXSourcesBuildPhase */ = {
+		A1000000000000000000104E /* PBXSourcesBuildPhase */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				"A1000000000000000000102B",
-				"A1000000000000000000102C",
-				"A1000000000000000000102D",
-				"A1000000000000000000102E",
-				"A1000000000000000000102F",
 				"A10000000000000000001030",
 				"A10000000000000000001031",
 				"A10000000000000000001032",
@@ -604,68 +654,78 @@
 				"A10000000000000000001034",
 				"A10000000000000000001035",
 				"A10000000000000000001036",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		A10000000000000000001045 /* PBXSourcesBuildPhase */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 				"A10000000000000000001037",
 				"A10000000000000000001038",
 				"A10000000000000000001039",
 				"A1000000000000000000103A",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		A10000000000000000001046 /* PBXSourcesBuildPhase */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 				"A1000000000000000000103B",
 				"A1000000000000000000103C",
 				"A1000000000000000000103D",
 				"A1000000000000000000103E",
 				"A1000000000000000000103F",
-				"A10000000000000000001040",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		A10000000000000000001047 /* PBXSourcesBuildPhase */ = {
+		A1000000000000000000104F /* PBXSourcesBuildPhase */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				"A10000000000000000001040",
 				"A10000000000000000001041",
+				"A10000000000000000001042",
+				"A10000000000000000001043",
+				"A10000000000000000001044",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A10000000000000000001050 /* PBXSourcesBuildPhase */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				"A10000000000000000001045",
+				"A10000000000000000001046",
+				"A10000000000000000001047",
+				"A10000000000000000001048",
+				"A10000000000000000001049",
+				"A1000000000000000000104A",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A10000000000000000001051 /* PBXSourcesBuildPhase */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				"A1000000000000000000104B",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		A10000000000000000001052 /* PBXTargetDependency */ = {
+		A1000000000000000000105C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = "A1000000000000000000104D";
-			targetProxy = "A10000000000000000001051";
+			target = "A10000000000000000001057";
+			targetProxy = "A1000000000000000000105B";
 		};
-		A10000000000000000001054 /* PBXTargetDependency */ = {
+		A1000000000000000000105E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = "A1000000000000000000104D";
-			targetProxy = "A10000000000000000001053";
+			target = "A10000000000000000001057";
+			targetProxy = "A1000000000000000000105D";
 		};
-		A10000000000000000001056 /* PBXTargetDependency */ = {
+		A10000000000000000001060 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = "A1000000000000000000104D";
-			targetProxy = "A10000000000000000001055";
+			target = "A10000000000000000001057";
+			targetProxy = "A1000000000000000000105F";
 		};
-		A10000000000000000001058 /* PBXTargetDependency */ = {
+		A10000000000000000001062 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = "A1000000000000000000104E";
-			targetProxy = "A10000000000000000001057";
+			target = "A10000000000000000001058";
+			targetProxy = "A10000000000000000001061";
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		A1000000000000000000105E /* XCBuildConfiguration */ = {
+		A10000000000000000001068 /* XCBuildConfiguration */ = {
 			isa = XCBuildConfiguration;
 			name = "Debug";
 			buildSettings = {
@@ -695,7 +755,7 @@
 				"GCC_PREPROCESSOR_DEFINITIONS" = "DEBUG=1";
 			};
 		};
-		A1000000000000000000105F /* XCBuildConfiguration */ = {
+		A10000000000000000001069 /* XCBuildConfiguration */ = {
 			isa = XCBuildConfiguration;
 			name = "Release";
 			buildSettings = {
@@ -724,7 +784,7 @@
 				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "";
 			};
 		};
-		A10000000000000000001060 /* XCBuildConfiguration */ = {
+		A1000000000000000000106A /* XCBuildConfiguration */ = {
 			isa = XCBuildConfiguration;
 			name = "Debug";
 			buildSettings = {
@@ -759,7 +819,7 @@
 				"GCC_PREPROCESSOR_DEFINITIONS" = "DEBUG=1";
 			};
 		};
-		A10000000000000000001061 /* XCBuildConfiguration */ = {
+		A1000000000000000000106B /* XCBuildConfiguration */ = {
 			isa = XCBuildConfiguration;
 			name = "Release";
 			buildSettings = {
@@ -793,7 +853,7 @@
 				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "";
 			};
 		};
-		A10000000000000000001062 /* XCBuildConfiguration */ = {
+		A1000000000000000000106C /* XCBuildConfiguration */ = {
 			isa = XCBuildConfiguration;
 			name = "Debug";
 			buildSettings = {
@@ -819,7 +879,7 @@
 				"SUPPORTED_PLATFORMS" = "macosx";
 				"GENERATE_INFOPLIST_FILE" = "NO";
 				"LD_RUNPATH_SEARCH_PATHS" = "@executable_path/../Frameworks";
-				"OTHER_LDFLAGS" = "-framework AppKit -framework PDFKit -framework CoreText -framework CoreGraphics -framework Foundation -framework UniformTypeIdentifiers -framework QuartzCore -Wl,-export_dynamic";
+				"OTHER_LDFLAGS" = "-framework AppKit -framework PDFKit -framework CoreText -framework CoreGraphics -framework Foundation -framework UniformTypeIdentifiers -framework QuartzCore -Wl,-export_dynamic -Wl,-all_load";
 				"GCC_SYMBOLS_PRIVATE_EXTERN" = "NO";
 				"COMBINE_HIDPI_IMAGES" = "YES";
 				"DEBUG_INFORMATION_FORMAT" = "dwarf";
@@ -831,7 +891,7 @@
 				"GCC_PREPROCESSOR_DEFINITIONS" = "DEBUG=1";
 			};
 		};
-		A10000000000000000001063 /* XCBuildConfiguration */ = {
+		A1000000000000000000106D /* XCBuildConfiguration */ = {
 			isa = XCBuildConfiguration;
 			name = "Release";
 			buildSettings = {
@@ -857,7 +917,7 @@
 				"SUPPORTED_PLATFORMS" = "macosx";
 				"GENERATE_INFOPLIST_FILE" = "NO";
 				"LD_RUNPATH_SEARCH_PATHS" = "@executable_path/../Frameworks";
-				"OTHER_LDFLAGS" = "-framework AppKit -framework PDFKit -framework CoreText -framework CoreGraphics -framework Foundation -framework UniformTypeIdentifiers -framework QuartzCore -Wl,-export_dynamic";
+				"OTHER_LDFLAGS" = "-framework AppKit -framework PDFKit -framework CoreText -framework CoreGraphics -framework Foundation -framework UniformTypeIdentifiers -framework QuartzCore -Wl,-export_dynamic -Wl,-all_load";
 				"GCC_SYMBOLS_PRIVATE_EXTERN" = "NO";
 				"COMBINE_HIDPI_IMAGES" = "YES";
 				"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
@@ -868,7 +928,7 @@
 				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "";
 			};
 		};
-		A10000000000000000001064 /* XCBuildConfiguration */ = {
+		A1000000000000000000106E /* XCBuildConfiguration */ = {
 			isa = XCBuildConfiguration;
 			name = "Debug";
 			buildSettings = {
@@ -905,7 +965,7 @@
 				"GCC_PREPROCESSOR_DEFINITIONS" = "DEBUG=1";
 			};
 		};
-		A10000000000000000001065 /* XCBuildConfiguration */ = {
+		A1000000000000000000106F /* XCBuildConfiguration */ = {
 			isa = XCBuildConfiguration;
 			name = "Release";
 			buildSettings = {
@@ -941,7 +1001,7 @@
 				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "";
 			};
 		};
-		A10000000000000000001066 /* XCBuildConfiguration */ = {
+		A10000000000000000001070 /* XCBuildConfiguration */ = {
 			isa = XCBuildConfiguration;
 			name = "Debug";
 			buildSettings = {
@@ -979,7 +1039,7 @@
 				"GCC_PREPROCESSOR_DEFINITIONS" = "DEBUG=1";
 			};
 		};
-		A10000000000000000001067 /* XCBuildConfiguration */ = {
+		A10000000000000000001071 /* XCBuildConfiguration */ = {
 			isa = XCBuildConfiguration;
 			name = "Release";
 			buildSettings = {
@@ -1019,47 +1079,47 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A1000000000000000000105D /* XCConfigurationList */ = {
+		A10000000000000000001067 /* XCConfigurationList */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				"A1000000000000000000105E",
-				"A1000000000000000000105F",
+				"A10000000000000000001068",
+				"A10000000000000000001069",
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = "Debug";
 		};
-		A10000000000000000001059 /* XCConfigurationList */ = {
+		A10000000000000000001063 /* XCConfigurationList */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				"A10000000000000000001060",
-				"A10000000000000000001061",
+				"A1000000000000000000106A",
+				"A1000000000000000000106B",
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = "Debug";
 		};
-		A1000000000000000000105A /* XCConfigurationList */ = {
+		A10000000000000000001064 /* XCConfigurationList */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				"A10000000000000000001062",
-				"A10000000000000000001063",
+				"A1000000000000000000106C",
+				"A1000000000000000000106D",
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = "Debug";
 		};
-		A1000000000000000000105B /* XCConfigurationList */ = {
+		A10000000000000000001065 /* XCConfigurationList */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				"A10000000000000000001064",
-				"A10000000000000000001065",
+				"A1000000000000000000106E",
+				"A1000000000000000000106F",
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = "Debug";
 		};
-		A1000000000000000000105C /* XCConfigurationList */ = {
+		A10000000000000000001066 /* XCConfigurationList */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				"A10000000000000000001066",
-				"A10000000000000000001067",
+				"A10000000000000000001070",
+				"A10000000000000000001071",
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = "Debug";
@@ -1067,5 +1127,5 @@
 /* End XCConfigurationList section */
 
 	};
-	rootObject = A1000000000000000000104C /* Project object */;
+	rootObject = A10000000000000000001056 /* Project object */;
 }

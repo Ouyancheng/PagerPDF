@@ -17,6 +17,31 @@ Point Rect::center() const {
     return Point{x + width * 0.5, y + height * 0.5};
 }
 
+Rect Rect::united(const Rect& other) const {
+    if (other.empty()) {
+        return *this;
+    }
+    if (empty()) {
+        return other;
+    }
+    const double minX = std::min(x, other.x);
+    const double minY = std::min(y, other.y);
+    const double maxX = std::max(x + width, other.x + other.width);
+    const double maxY = std::max(y + height, other.y + other.height);
+    return Rect{minX, minY, maxX - minX, maxY - minY};
+}
+
+Rect Rect::intersection(const Rect& other) const {
+    const double minX = std::max(x, other.x);
+    const double minY = std::max(y, other.y);
+    const double maxX = std::min(x + width, other.x + other.width);
+    const double maxY = std::min(y + height, other.y + other.height);
+    if (maxX <= minX || maxY <= minY) {
+        return Rect{};
+    }
+    return Rect{minX, minY, maxX - minX, maxY - minY};
+}
+
 PageRotation RotationFromDegrees(int degrees) {
     int normalized = ((degrees % 360) + 360) % 360;
     switch (normalized) {

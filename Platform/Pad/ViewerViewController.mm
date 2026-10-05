@@ -6,6 +6,7 @@
 #import "Zoom.hpp"
 
 #include "Geometry.hpp"
+#include "ToolPalette.hpp"
 
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 
@@ -209,28 +210,6 @@ NSArray<NSString *> *SizeChipLabels(const std::vector<float> &sizes, pager::Tool
     return labels;
 }
 
-pager::Tool ToolForKind(pager::AnnotationKind kind) {
-    switch (kind) {
-        case pager::AnnotationKind::Highlight:
-            return pager::Tool::Highlight;
-        case pager::AnnotationKind::Underline:
-            return pager::Tool::Underline;
-        case pager::AnnotationKind::StrikeOut:
-            return pager::Tool::StrikeOut;
-        case pager::AnnotationKind::Circle:
-            return pager::Tool::Circle;
-        case pager::AnnotationKind::Line:
-            return pager::Tool::Line;
-        case pager::AnnotationKind::FreeText:
-            return pager::Tool::FreeText;
-        case pager::AnnotationKind::Ink:
-            return pager::Tool::Pen;
-        case pager::AnnotationKind::Square:
-        default:
-            return pager::Tool::Square;
-    }
-}
-
 UIView *Hairline(void) {
     UIView *line = [[UIView alloc] init];
     line.translatesAutoresizingMaskIntoConstraints = NO;
@@ -377,6 +356,9 @@ NSInteger ToolsetForTool(pager::Tool tool) {
     UITapGestureRecognizer *_doubleTap;
     CGPoint _dockDragOrigin;
     BOOL _needsFitWidth;
+    BOOL _exporting;
+    std::uint64_t _notesTableRevision;
+    __weak PadDocument *_notesTableDocument;
     BOOL _sidebarVisible;
     BOOL _chromeVisible;
     BOOL _searchExpanded;
@@ -719,6 +701,7 @@ NSInteger ToolsetForTool(pager::Tool tool) {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(notesChanged:) name:@"PagerNotesChanged" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(selectionChanged:) name:@"PagerSelectionChanged" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(toggleChrome:) name:@"PagerToggleChrome" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(canvasSelectedTool:) name:@"PagerSelectTool" object:nil];
     [self refreshToolButtons];
     [self applyChromeAnimated:NO];
 }
@@ -1085,54 +1068,15 @@ NSInteger ToolsetForTool(pager::Tool tool) {
 }
 
 - (void)fillStylePaletteForTool:(pager::Tool)styleTool {
-    _styleColors.clear();
-    _styleSizes.clear();
-    auto addColor = [&](float r, float g, float b, float a) {
-        _styleColors.push_back(pager::Color{r, g, b, a});
-    };
-    if (styleTool == pager::Tool::Marker) {
-        addColor(1, 0.85f, 0.1f, 0.45f);
-        addColor(1, 0.35f, 0.55f, 0.45f);
-        addColor(0.35f, 0.85f, 0.35f, 0.45f);
-        addColor(0.25f, 0.55f, 1, 0.45f);
-        addColor(1, 0.55f, 0.15f, 0.45f);
-    } else if (styleTool == pager::Tool::Highlight) {
-        addColor(1, 0.84f, 0.12f, 0.42f);
-        addColor(0.45f, 0.9f, 0.3f, 0.42f);
-        addColor(1, 0.4f, 0.7f, 0.42f);
-        addColor(0.35f, 0.65f, 1, 0.42f);
-        addColor(1, 0.55f, 0.15f, 0.42f);
-    } else if (styleTool == pager::Tool::Pen) {
-        addColor(0.05f, 0.05f, 0.05f, 1);
-        addColor(0.45f, 0.45f, 0.48f, 1);
-        addColor(0.1f, 0.35f, 0.9f, 1);
-        addColor(0.85f, 0.12f, 0.12f, 1);
-        addColor(0.1f, 0.55f, 0.2f, 1);
-        addColor(0.45f, 0.2f, 0.75f, 1);
-    } else {
-        addColor(0.12f, 0.12f, 0.14f, 1);
-        addColor(0.1f, 0.35f, 0.9f, 1);
-        addColor(0.85f, 0.12f, 0.12f, 1);
-        addColor(0.1f, 0.55f, 0.2f, 1);
-        addColor(0.9f, 0.45f, 0.1f, 1);
-        addColor(0.45f, 0.2f, 0.75f, 1);
-    }
-    if (styleTool == pager::Tool::FreeText) {
-        _styleSizes = {11, 14, 18, 24};
-    } else if (styleTool == pager::Tool::Pen) {
-        _styleSizes = {1.4f, 2.2f, 3.6f};
-    } else if (styleTool == pager::Tool::Marker) {
-        _styleSizes = {8, 14, 22};
-    } else if (styleTool == pager::Tool::Square || styleTool == pager::Tool::Circle || styleTool == pager::Tool::Line) {
-        _styleSizes = {1, 2, 4};
-    }
+    _styleColors = pager::PaletteColors(styleTool);
+    _styleSizes = pager::PaletteSizes(styleTool);
 }
 
 - (void)currentStyleTool:(pager::Tool *)tool color:(pager::Color *)color size:(float *)size {
     pager::Tool styleTool = _tool;
     const pager::Annotation *selected = _document == nil ? nullptr : _document.session.selectedAnnotation();
     if (selected != nullptr) {
-        styleTool = ToolForKind(selected->kind);
+        styleTool = pager::ToolForAnnotation(*selected);
     }
     const pager::ToolStyle fallback = pager::DefaultStyleForTool(styleTool);
     pager::Color current = fallback.color;
@@ -1358,12 +1302,11 @@ NSInteger ToolsetForTool(pager::Tool tool) {
         return;
     }
     pager::Tool styleTool = _tool;
-    pager::Annotation *selected = _document.session.selectedAnnotationMutable();
-    if (selected != nullptr) {
-        _document.session.notes().snapshot();
-        selected->color = color;
-        styleTool = ToolForKind(selected->kind);
-        [_document saveNotes];
+    if (const pager::Annotation *selected = _document.session.selectedAnnotation()) {
+        styleTool = pager::ToolForAnnotation(*selected);
+        if (_document.session.notes().update(selected->id, [&](pager::Annotation &note) { note.color = color; })) {
+            [_document saveNotes];
+        }
     }
     pager::ToolStyle style = _document.session.toolStyle(styleTool);
     style.color = color;
@@ -1379,16 +1322,18 @@ NSInteger ToolsetForTool(pager::Tool tool) {
         return;
     }
     pager::Tool styleTool = _tool;
-    pager::Annotation *selected = _document.session.selectedAnnotationMutable();
-    if (selected != nullptr) {
-        _document.session.notes().snapshot();
-        styleTool = ToolForKind(selected->kind);
-        if (selected->kind == pager::AnnotationKind::FreeText) {
-            selected->fontSize = size;
-        } else {
-            selected->lineWidth = size;
+    if (const pager::Annotation *selected = _document.session.selectedAnnotation()) {
+        styleTool = pager::ToolForAnnotation(*selected);
+        const bool changed = _document.session.notes().update(selected->id, [&](pager::Annotation &note) {
+            if (note.kind == pager::AnnotationKind::FreeText) {
+                note.fontSize = size;
+            } else {
+                note.lineWidth = size;
+            }
+        });
+        if (changed) {
+            [_document saveNotes];
         }
-        [_document saveNotes];
     }
     pager::ToolStyle style = _document.session.toolStyle(styleTool);
     if (styleTool == pager::Tool::FreeText) {
@@ -1619,13 +1564,15 @@ NSInteger ToolsetForTool(pager::Tool tool) {
     const double x = (_scrollView.contentOffset.x + _scrollView.bounds.size.width * 0.5) / zoom;
     int best = -1;
     double bestVisible = 0;
-    for (const pager::PageFrame &frame : layout.pages()) {
-        const double vis0 = std::max(frame.frame.y, y0);
-        const double vis1 = std::min(frame.frame.y + frame.frame.height, y1);
+    const pager::Size content = layout.contentSize();
+    for (const int index : layout.pagesIntersecting(pager::Rect{0, y0, std::max(1.0, content.width), std::max(1.0, y1 - y0)})) {
+        const pager::Rect frame = layout.pageFrame(index);
+        const double vis0 = std::max(frame.y, y0);
+        const double vis1 = std::min(frame.y + frame.height, y1);
         const double visible = vis1 - vis0;
         if (visible > bestVisible) {
             bestVisible = visible;
-            best = frame.index;
+            best = index;
         }
     }
     if (best >= 0) {
@@ -1732,6 +1679,7 @@ NSInteger ToolsetForTool(pager::Tool tool) {
 - (void)clearSearchResults {
     _searchField.text = @"";
     if (_document != nil) {
+        [_document.source cancelSearch];
         _document.session.clearSearch();
     }
     [_canvas setNeedsDisplay];
@@ -1752,6 +1700,13 @@ NSInteger ToolsetForTool(pager::Tool tool) {
 
 - (void)selectionChanged:(NSNotification *)notification {
     [self notesChanged:notification];
+}
+
+- (void)canvasSelectedTool:(NSNotification *)notification {
+    if (notification.object != _document) {
+        return;
+    }
+    [self applyTool:static_cast<pager::Tool>([notification.userInfo[@"tool"] integerValue])];
 }
 
 - (void)updateZoomCentering {
@@ -1826,6 +1781,7 @@ NSInteger ToolsetForTool(pager::Tool tool) {
     if (_document == nil || field.text.length > 0) {
         return;
     }
+    [_document.source cancelSearch];
     _document.session.clearSearch();
     [_canvas setNeedsDisplay];
 }
@@ -1836,16 +1792,27 @@ NSInteger ToolsetForTool(pager::Tool tool) {
     }
     NSString *query = field.text ?: @"";
     if (query.length == 0) {
+        [_document.source cancelSearch];
         _document.session.clearSearch();
-        [_canvas setNeedsDisplay];
+        [_canvas annotationsDidChange];
         return;
     }
-    _document.session.setSearchHits([_document.source findString:query]);
-    const pager::TextSelection *hit = _document.session.currentSearchHit();
-    if (hit != nullptr && !hit->quads.empty()) {
-        [self scrollToPage:hit->quads.front().pageIndex userPoint:hit->quads.front().quad.v[0]];
-    }
-    [_canvas setNeedsDisplay];
+    // Long documents take a while to search; keep the UI responsive and drop stale results.
+    PadDocument *document = _document;
+    __weak ViewerViewController *weakSelf = self;
+    [document.source findString:query
+                     completion:^(std::vector<pager::TextSelection> hits) {
+                         ViewerViewController *strongSelf = weakSelf;
+                         if (strongSelf == nil || strongSelf->_document != document) {
+                             return;
+                         }
+                         document.session.setSearchHits(std::move(hits));
+                         const pager::TextSelection *hit = document.session.currentSearchHit();
+                         if (hit != nullptr && !hit->quads.empty()) {
+                             [strongSelf scrollToPage:hit->quads.front().pageIndex userPoint:hit->quads.front().quad.v[0]];
+                         }
+                         [strongSelf->_canvas annotationsDidChange];
+                     }];
 }
 
 - (void)stepSearchHit:(NSInteger)delta {
@@ -1897,8 +1864,12 @@ NSInteger ToolsetForTool(pager::Tool tool) {
 
 - (void)notesChanged:(NSNotification *)notification {
     [self refreshStyleBar];
-    [_notesTable reloadData];
-    [_outlineTable reloadData];
+    const std::uint64_t revision = _document == nil ? 0 : _document.session.notes().revision();
+    if (revision != _notesTableRevision || _document != _notesTableDocument) {
+        _notesTableRevision = revision;
+        _notesTableDocument = _document;
+        [_notesTable reloadData];
+    }
     const pager::AnnotationId selected = _document == nil ? pager::AnnotationId{} : _document.session.selectedNote();
     NSInteger row = NSNotFound;
     if (_document != nil) {
@@ -1919,6 +1890,7 @@ NSInteger ToolsetForTool(pager::Tool tool) {
 }
 
 - (void)undo:(id)sender {
+    [_canvas endTextEditing];
     if (_document == nil || !_document.session.notes().canUndo()) {
         return;
     }
@@ -1929,6 +1901,7 @@ NSInteger ToolsetForTool(pager::Tool tool) {
 }
 
 - (void)redo:(id)sender {
+    [_canvas endTextEditing];
     if (_document == nil || !_document.session.notes().canRedo()) {
         return;
     }
@@ -1951,16 +1924,38 @@ NSInteger ToolsetForTool(pager::Tool tool) {
         [self showAlert:@"Nothing to export" message:@"Open a PDF first."];
         return;
     }
-    NSURL *url = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:@"PagerFlattened.pdf"]];
-    NSError *error = nil;
-    if (![_document.source writeFlattenedSession:_document.session toURL:url error:&error]) {
-        [self showAlert:@"Export failed" message:error.localizedDescription ?: @"The PDF could not be written."];
+    if (_exporting) {
         return;
     }
-    UIActivityViewController *activity = [[UIActivityViewController alloc] initWithActivityItems:@[url] applicationActivities:nil];
+    [_canvas endTextEditing];
+    _exporting = YES;
+    NSString *name = self->_document.fileURL.lastPathComponent.stringByDeletingPathExtension ?: @"Document";
+    NSURL *url = [NSURL fileURLWithPath:[NSTemporaryDirectory()
+                                            stringByAppendingPathComponent:[name stringByAppendingString:@" (Annotated).pdf"]]];
+    // Export renders every page; do it off the main thread from a snapshot of the notes.
+    auto notes = std::make_shared<std::vector<pager::Annotation>>(_document.session.notes().annotations());
+    PDFKitPageSource *source = _document.source;
     UIButton *anchor = [sender isKindOfClass:[UIButton class]] ? (UIButton *)sender : _moreButton;
-    [self anchorPopover:activity fromButton:anchor];
-    [self presentViewController:activity animated:YES completion:nil];
+    __weak ViewerViewController *weakSelf = self;
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+        NSError *error = nil;
+        const BOOL written = [source writeFlattenedNotes:*notes toURL:url error:&error];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            ViewerViewController *strongSelf = weakSelf;
+            if (strongSelf == nil) {
+                return;
+            }
+            strongSelf->_exporting = NO;
+            if (!written) {
+                [strongSelf showAlert:@"Export failed" message:error.localizedDescription ?: @"The PDF could not be written."];
+                return;
+            }
+            UIActivityViewController *activity = [[UIActivityViewController alloc] initWithActivityItems:@[url]
+                                                                                   applicationActivities:nil];
+            [strongSelf anchorPopover:activity fromButton:anchor];
+            [strongSelf presentViewController:activity animated:YES completion:nil];
+        });
+    });
 }
 
 - (void)editTextNoteAtRow:(NSInteger)row {
@@ -1983,12 +1978,13 @@ NSInteger ToolsetForTool(pager::Tool tool) {
             return;
         }
         NSString *text = alert.textFields.firstObject.text ?: @"";
-        pager::NoteDocument &notes = strongSelf->_document.session.notes();
-        pager::Annotation updated = note;
-        updated.contents = text.UTF8String;
-        notes.remove(note.id);
-        notes.add(updated);
-        [strongSelf->_document saveNotes];
+        const std::string contents = text.UTF8String ?: "";
+        // In place: one undo step, and the note keeps its position in the list and z-order.
+        if (strongSelf->_document.session.notes().update(note.id, [&](pager::Annotation &edited) {
+                edited.contents = contents;
+            })) {
+            [strongSelf->_document saveNotes];
+        }
         [strongSelf notesChanged:nil];
     }]];
     [self presentViewController:alert animated:YES completion:nil];

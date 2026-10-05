@@ -1,12 +1,13 @@
 #pragma once
 
+#import "CanvasController.h"
 #import "PDFKitPageSource.h"
 
 #include "DocumentSession.hpp"
 
 #import <UIKit/UIKit.h>
 
-@interface PadDocument : UIDocument
+@interface PadDocument : UIDocument <PagerSessionProvider>
 
 - (pager::DocumentSession &)session;
 - (PDFKitPageSource *)source;
