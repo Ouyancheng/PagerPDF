@@ -1,0 +1,1071 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A1000000000000000000102B /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A10000000000000000001001";
+		};
+		A1000000000000000000102C /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A10000000000000000001002";
+		};
+		A1000000000000000000102D /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A10000000000000000001003";
+		};
+		A1000000000000000000102E /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A10000000000000000001004";
+		};
+		A1000000000000000000102F /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A10000000000000000001005";
+		};
+		A10000000000000000001030 /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A10000000000000000001006";
+		};
+		A10000000000000000001031 /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A10000000000000000001007";
+		};
+		A10000000000000000001032 /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A10000000000000000001008";
+		};
+		A10000000000000000001033 /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A10000000000000000001009";
+		};
+		A10000000000000000001034 /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A1000000000000000000100A";
+		};
+		A10000000000000000001035 /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A1000000000000000000100B";
+		};
+		A10000000000000000001036 /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A1000000000000000000100C";
+		};
+		A10000000000000000001037 /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A1000000000000000000100D";
+		};
+		A10000000000000000001038 /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A1000000000000000000100E";
+		};
+		A10000000000000000001039 /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A1000000000000000000100F";
+		};
+		A1000000000000000000103A /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A10000000000000000001010";
+		};
+		A1000000000000000000103B /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A10000000000000000001011";
+		};
+		A1000000000000000000103C /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A10000000000000000001012";
+		};
+		A1000000000000000000103D /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A10000000000000000001013";
+		};
+		A1000000000000000000103E /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A10000000000000000001014";
+		};
+		A1000000000000000000103F /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A10000000000000000001015";
+		};
+		A10000000000000000001040 /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A10000000000000000001016";
+		};
+		A10000000000000000001041 /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A10000000000000000001017";
+		};
+		A10000000000000000001042 /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A10000000000000000001025";
+		};
+		A10000000000000000001043 /* PBXBuildFile */ = {
+			isa = PBXBuildFile;
+			fileRef = "A10000000000000000001025";
+		};
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A10000000000000000001051 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = "A1000000000000000000104C";
+			proxyType = 1;
+			remoteGlobalIDString = "A1000000000000000000104D";
+			remoteInfo = "PagerCore";
+		};
+		A10000000000000000001053 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = "A1000000000000000000104C";
+			proxyType = 1;
+			remoteGlobalIDString = "A1000000000000000000104D";
+			remoteInfo = "PagerCorePad";
+		};
+		A10000000000000000001055 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = "A1000000000000000000104C";
+			proxyType = 1;
+			remoteGlobalIDString = "A1000000000000000000104D";
+			remoteInfo = "PagerCoreTest";
+		};
+		A10000000000000000001057 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = "A1000000000000000000104C";
+			proxyType = 1;
+			remoteGlobalIDString = "A1000000000000000000104E";
+			remoteInfo = "PagerMac";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		A10000000000000000001001 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+			path = "Annotation.cpp";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001002 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+			path = "NoteDocument.cpp";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001003 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.objcpp";
+			path = "NoteArchive.mm";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001004 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.objcpp";
+			path = "OverlayRenderer.mm";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001005 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.objcpp";
+			path = "PDFKitPageSource.mm";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001006 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+			path = "Geometry.cpp";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001007 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+			path = "Layout.cpp";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001008 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+			path = "Zoom.cpp";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001009 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+			path = "Ink.cpp";
+			sourceTree = "<group>";
+		};
+		A1000000000000000000100A /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+			path = "TileCache.cpp";
+			sourceTree = "<group>";
+		};
+		A1000000000000000000100B /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+			path = "Viewport.cpp";
+			sourceTree = "<group>";
+		};
+		A1000000000000000000100C /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+			path = "DocumentSession.cpp";
+			sourceTree = "<group>";
+		};
+		A1000000000000000000100D /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.objcpp";
+			path = "AppDelegate.mm";
+			sourceTree = "<group>";
+		};
+		A1000000000000000000100E /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.objcpp";
+			path = "PagerDocument.mm";
+			sourceTree = "<group>";
+		};
+		A1000000000000000000100F /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.objcpp";
+			path = "PagerDocumentView.mm";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001010 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.objcpp";
+			path = "main.mm";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001011 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.objcpp";
+			path = "AppDelegate.mm";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001012 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.objcpp";
+			path = "PadCanvasView.mm";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001013 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.objcpp";
+			path = "PadDocument.mm";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001014 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.objcpp";
+			path = "SceneDelegate.mm";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001015 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.objcpp";
+			path = "ViewerViewController.mm";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001016 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.objcpp";
+			path = "main.mm";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001017 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "sourcecode.cpp.objcpp";
+			path = "PagerCoreTests.mm";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001018 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "text.plist.xml";
+			path = "Info.plist";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001019 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = "text.plist.xml";
+			path = "Info.plist";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001025 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			explicitFileType = "archive.ar";
+			includeInIndex = 0;
+			path = "libPagerCore.a";
+			sourceTree = "BUILT_PRODUCTS_DIR";
+		};
+		A10000000000000000001026 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			explicitFileType = "wrapper.application";
+			includeInIndex = 0;
+			path = "PagerMac.app";
+			sourceTree = "BUILT_PRODUCTS_DIR";
+		};
+		A10000000000000000001027 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			explicitFileType = "wrapper.application";
+			includeInIndex = 0;
+			path = "PagerPad.app";
+			sourceTree = "BUILT_PRODUCTS_DIR";
+		};
+		A10000000000000000001028 /* PBXFileReference */ = {
+			isa = PBXFileReference;
+			explicitFileType = "wrapper.cfbundle";
+			includeInIndex = 0;
+			path = "PagerCoreTests.xctest";
+			sourceTree = "BUILT_PRODUCTS_DIR";
+		};
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A1000000000000000000104B /* PBXFrameworksBuildPhase */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A10000000000000000001048 /* PBXFrameworksBuildPhase */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				"A10000000000000000001042",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A10000000000000000001049 /* PBXFrameworksBuildPhase */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				"A10000000000000000001043",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1000000000000000000104A /* PBXFrameworksBuildPhase */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A1000000000000000000101A /* PBXGroup */ = {
+			isa = PBXGroup;
+			children = (
+				"A10000000000000000001001",
+				"A10000000000000000001002",
+			);
+			path = "Annotations";
+			sourceTree = "<group>";
+		};
+		A1000000000000000000101B /* PBXGroup */ = {
+			isa = PBXGroup;
+			children = (
+				"A10000000000000000001003",
+				"A10000000000000000001004",
+				"A10000000000000000001005",
+			);
+			path = "Bridge";
+			sourceTree = "<group>";
+		};
+		A1000000000000000000101D /* PBXGroup */ = {
+			isa = PBXGroup;
+			children = (
+				"A10000000000000000001006",
+				"A10000000000000000001007",
+				"A10000000000000000001008",
+			);
+			path = "Geometry";
+			sourceTree = "<group>";
+		};
+		A1000000000000000000101F /* PBXGroup */ = {
+			isa = PBXGroup;
+			children = (
+				"A10000000000000000001009",
+			);
+			path = "Ink";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001020 /* PBXGroup */ = {
+			isa = PBXGroup;
+			children = (
+				"A1000000000000000000100A",
+				"A1000000000000000000100B",
+			);
+			path = "Render";
+			sourceTree = "<group>";
+		};
+		A1000000000000000000101E /* PBXGroup */ = {
+			isa = PBXGroup;
+			children = (
+				"A1000000000000000000100C",
+			);
+			path = "Session";
+			sourceTree = "<group>";
+		};
+		A1000000000000000000101C /* PBXGroup */ = {
+			isa = PBXGroup;
+			children = (
+				"A1000000000000000000100D",
+				"A10000000000000000001018",
+				"A10000000000000000001010",
+				"A1000000000000000000100E",
+				"A1000000000000000000100F",
+			);
+			path = "Mac";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001021 /* PBXGroup */ = {
+			isa = PBXGroup;
+			children = (
+				"A10000000000000000001011",
+				"A10000000000000000001019",
+				"A10000000000000000001016",
+				"A10000000000000000001012",
+				"A10000000000000000001013",
+				"A10000000000000000001014",
+				"A10000000000000000001015",
+			);
+			path = "Pad";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001023 /* PBXGroup */ = {
+			isa = PBXGroup;
+			children = (
+				"A10000000000000000001017",
+			);
+			path = "Tests";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001022 /* PBXGroup */ = {
+			isa = PBXGroup;
+			children = (
+				"A1000000000000000000101A",
+				"A1000000000000000000101B",
+				"A1000000000000000000101D",
+				"A1000000000000000000101F",
+				"A10000000000000000001020",
+				"A1000000000000000000101E",
+			);
+			path = "Core";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001024 /* PBXGroup */ = {
+			isa = PBXGroup;
+			children = (
+				"A1000000000000000000101C",
+				"A10000000000000000001021",
+			);
+			path = "Platform";
+			sourceTree = "<group>";
+		};
+		A10000000000000000001029 /* PBXGroup */ = {
+			isa = PBXGroup;
+			children = (
+				"A10000000000000000001025",
+				"A10000000000000000001026",
+				"A10000000000000000001027",
+				"A10000000000000000001028",
+			);
+			name = "Products";
+			sourceTree = "<group>";
+		};
+		A1000000000000000000102A /* PBXGroup */ = {
+			isa = PBXGroup;
+			children = (
+				"A10000000000000000001022",
+				"A10000000000000000001024",
+				"A10000000000000000001023",
+				"A10000000000000000001029",
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A1000000000000000000104D /* PBXNativeTarget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = "A10000000000000000001059";
+			buildPhases = (
+				"A10000000000000000001044",
+				"A1000000000000000000104B",
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "PagerCore";
+			productName = "PagerCore";
+			productReference = "A10000000000000000001025";
+			productType = "com.apple.product-type.library.static";
+		};
+		A1000000000000000000104E /* PBXNativeTarget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = "A1000000000000000000105A";
+			buildPhases = (
+				"A10000000000000000001045",
+				"A10000000000000000001048",
+			);
+			buildRules = (
+			);
+			dependencies = (
+				"A10000000000000000001052",
+			);
+			name = "PagerMac";
+			productName = "PagerMac";
+			productReference = "A10000000000000000001026";
+			productType = "com.apple.product-type.application";
+		};
+		A1000000000000000000104F /* PBXNativeTarget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = "A1000000000000000000105B";
+			buildPhases = (
+				"A10000000000000000001046",
+				"A10000000000000000001049",
+			);
+			buildRules = (
+			);
+			dependencies = (
+				"A10000000000000000001054",
+			);
+			name = "PagerPad";
+			productName = "PagerPad";
+			productReference = "A10000000000000000001027";
+			productType = "com.apple.product-type.application";
+		};
+		A10000000000000000001050 /* PBXNativeTarget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = "A1000000000000000000105C";
+			buildPhases = (
+				"A10000000000000000001047",
+				"A1000000000000000000104A",
+			);
+			buildRules = (
+			);
+			dependencies = (
+				"A10000000000000000001056",
+				"A10000000000000000001058",
+			);
+			name = "PagerCoreTests";
+			productName = "PagerCoreTests";
+			productReference = "A10000000000000000001028";
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A1000000000000000000104C /* PBXProject */ = {
+			isa = PBXProject;
+			attributes = {
+				"BuildIndependentTargetsInParallel" = 1;
+				"LastUpgradeCheck" = 1600;
+			};
+			buildConfigurationList = "A1000000000000000000105D";
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = "en";
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				"en",
+				"Base",
+			);
+			mainGroup = "A1000000000000000000102A";
+			productRefGroup = "A10000000000000000001029";
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				"A1000000000000000000104D",
+				"A1000000000000000000104E",
+				"A1000000000000000000104F",
+				"A10000000000000000001050",
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A10000000000000000001044 /* PBXSourcesBuildPhase */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				"A1000000000000000000102B",
+				"A1000000000000000000102C",
+				"A1000000000000000000102D",
+				"A1000000000000000000102E",
+				"A1000000000000000000102F",
+				"A10000000000000000001030",
+				"A10000000000000000001031",
+				"A10000000000000000001032",
+				"A10000000000000000001033",
+				"A10000000000000000001034",
+				"A10000000000000000001035",
+				"A10000000000000000001036",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A10000000000000000001045 /* PBXSourcesBuildPhase */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				"A10000000000000000001037",
+				"A10000000000000000001038",
+				"A10000000000000000001039",
+				"A1000000000000000000103A",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A10000000000000000001046 /* PBXSourcesBuildPhase */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				"A1000000000000000000103B",
+				"A1000000000000000000103C",
+				"A1000000000000000000103D",
+				"A1000000000000000000103E",
+				"A1000000000000000000103F",
+				"A10000000000000000001040",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A10000000000000000001047 /* PBXSourcesBuildPhase */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				"A10000000000000000001041",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A10000000000000000001052 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "A1000000000000000000104D";
+			targetProxy = "A10000000000000000001051";
+		};
+		A10000000000000000001054 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "A1000000000000000000104D";
+			targetProxy = "A10000000000000000001053";
+		};
+		A10000000000000000001056 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "A1000000000000000000104D";
+			targetProxy = "A10000000000000000001055";
+		};
+		A10000000000000000001058 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "A1000000000000000000104E";
+			targetProxy = "A10000000000000000001057";
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		A1000000000000000000105E /* XCBuildConfiguration */ = {
+			isa = XCBuildConfiguration;
+			name = "Debug";
+			buildSettings = {
+				"CLANG_CXX_LANGUAGE_STANDARD" = "c++20";
+				"CLANG_CXX_LIBRARY" = "libc++";
+				"GCC_ENABLE_CPP_EXCEPTIONS" = "NO";
+				"GCC_ENABLE_CPP_RTTI" = "NO";
+				"CLANG_ENABLE_OBJC_ARC" = "YES";
+				"CLANG_ENABLE_MODULES" = "YES";
+				"CODE_SIGNING_ALLOWED" = "NO";
+				"CODE_SIGN_IDENTITY" = "";
+				"ENABLE_HARDENED_RUNTIME" = "NO";
+				"HEADER_SEARCH_PATHS" = "$(SRCROOT)/Core/Include $(SRCROOT)/Core/Bridge";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+				"CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER" = "NO";
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "NO";
+				"GCC_C_LANGUAGE_STANDARD" = "gnu17";
+				"SDKROOT" = "auto";
+				"SUPPORTED_PLATFORMS" = "macosx iphoneos iphonesimulator";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf";
+				"GCC_OPTIMIZATION_LEVEL" = "0";
+				"ONLY_ACTIVE_ARCH" = "YES";
+				"MTL_ENABLE_DEBUG_INFO" = "INCLUDE_SOURCE";
+				"ENABLE_NS_ASSERTIONS" = "YES";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "";
+				"GCC_PREPROCESSOR_DEFINITIONS" = "DEBUG=1";
+			};
+		};
+		A1000000000000000000105F /* XCBuildConfiguration */ = {
+			isa = XCBuildConfiguration;
+			name = "Release";
+			buildSettings = {
+				"CLANG_CXX_LANGUAGE_STANDARD" = "c++20";
+				"CLANG_CXX_LIBRARY" = "libc++";
+				"GCC_ENABLE_CPP_EXCEPTIONS" = "NO";
+				"GCC_ENABLE_CPP_RTTI" = "NO";
+				"CLANG_ENABLE_OBJC_ARC" = "YES";
+				"CLANG_ENABLE_MODULES" = "YES";
+				"CODE_SIGNING_ALLOWED" = "NO";
+				"CODE_SIGN_IDENTITY" = "";
+				"ENABLE_HARDENED_RUNTIME" = "NO";
+				"HEADER_SEARCH_PATHS" = "$(SRCROOT)/Core/Include $(SRCROOT)/Core/Bridge";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+				"CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER" = "NO";
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "NO";
+				"GCC_C_LANGUAGE_STANDARD" = "gnu17";
+				"SDKROOT" = "auto";
+				"SUPPORTED_PLATFORMS" = "macosx iphoneos iphonesimulator";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
+				"GCC_OPTIMIZATION_LEVEL" = "s";
+				"ONLY_ACTIVE_ARCH" = "NO";
+				"MTL_ENABLE_DEBUG_INFO" = "NO";
+				"ENABLE_NS_ASSERTIONS" = "NO";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "";
+			};
+		};
+		A10000000000000000001060 /* XCBuildConfiguration */ = {
+			isa = XCBuildConfiguration;
+			name = "Debug";
+			buildSettings = {
+				"CLANG_CXX_LANGUAGE_STANDARD" = "c++20";
+				"CLANG_CXX_LIBRARY" = "libc++";
+				"GCC_ENABLE_CPP_EXCEPTIONS" = "NO";
+				"GCC_ENABLE_CPP_RTTI" = "NO";
+				"CLANG_ENABLE_OBJC_ARC" = "YES";
+				"CLANG_ENABLE_MODULES" = "YES";
+				"CODE_SIGNING_ALLOWED" = "NO";
+				"CODE_SIGN_IDENTITY" = "";
+				"ENABLE_HARDENED_RUNTIME" = "NO";
+				"HEADER_SEARCH_PATHS" = "$(SRCROOT)/Core/Include $(SRCROOT)/Core/Bridge";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+				"CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER" = "NO";
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "NO";
+				"GCC_C_LANGUAGE_STANDARD" = "gnu17";
+				"PRODUCT_NAME" = "PagerCore";
+				"EXECUTABLE_PREFIX" = "lib";
+				"SKIP_INSTALL" = "YES";
+				"SDKROOT" = "auto";
+				"SUPPORTED_PLATFORMS" = "macosx iphoneos iphonesimulator";
+				"MACH_O_TYPE" = "staticlib";
+				"OTHER_LDFLAGS" = "-framework Foundation -framework CoreGraphics -framework CoreText -framework PDFKit";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf";
+				"GCC_OPTIMIZATION_LEVEL" = "0";
+				"ONLY_ACTIVE_ARCH" = "YES";
+				"MTL_ENABLE_DEBUG_INFO" = "INCLUDE_SOURCE";
+				"ENABLE_NS_ASSERTIONS" = "YES";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "";
+				"GCC_PREPROCESSOR_DEFINITIONS" = "DEBUG=1";
+			};
+		};
+		A10000000000000000001061 /* XCBuildConfiguration */ = {
+			isa = XCBuildConfiguration;
+			name = "Release";
+			buildSettings = {
+				"CLANG_CXX_LANGUAGE_STANDARD" = "c++20";
+				"CLANG_CXX_LIBRARY" = "libc++";
+				"GCC_ENABLE_CPP_EXCEPTIONS" = "NO";
+				"GCC_ENABLE_CPP_RTTI" = "NO";
+				"CLANG_ENABLE_OBJC_ARC" = "YES";
+				"CLANG_ENABLE_MODULES" = "YES";
+				"CODE_SIGNING_ALLOWED" = "NO";
+				"CODE_SIGN_IDENTITY" = "";
+				"ENABLE_HARDENED_RUNTIME" = "NO";
+				"HEADER_SEARCH_PATHS" = "$(SRCROOT)/Core/Include $(SRCROOT)/Core/Bridge";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+				"CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER" = "NO";
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "NO";
+				"GCC_C_LANGUAGE_STANDARD" = "gnu17";
+				"PRODUCT_NAME" = "PagerCore";
+				"EXECUTABLE_PREFIX" = "lib";
+				"SKIP_INSTALL" = "YES";
+				"SDKROOT" = "auto";
+				"SUPPORTED_PLATFORMS" = "macosx iphoneos iphonesimulator";
+				"MACH_O_TYPE" = "staticlib";
+				"OTHER_LDFLAGS" = "-framework Foundation -framework CoreGraphics -framework CoreText -framework PDFKit";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
+				"GCC_OPTIMIZATION_LEVEL" = "s";
+				"ONLY_ACTIVE_ARCH" = "NO";
+				"MTL_ENABLE_DEBUG_INFO" = "NO";
+				"ENABLE_NS_ASSERTIONS" = "NO";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "";
+			};
+		};
+		A10000000000000000001062 /* XCBuildConfiguration */ = {
+			isa = XCBuildConfiguration;
+			name = "Debug";
+			buildSettings = {
+				"CLANG_CXX_LANGUAGE_STANDARD" = "c++20";
+				"CLANG_CXX_LIBRARY" = "libc++";
+				"GCC_ENABLE_CPP_EXCEPTIONS" = "NO";
+				"GCC_ENABLE_CPP_RTTI" = "NO";
+				"CLANG_ENABLE_OBJC_ARC" = "YES";
+				"CLANG_ENABLE_MODULES" = "YES";
+				"CODE_SIGNING_ALLOWED" = "NO";
+				"CODE_SIGN_IDENTITY" = "";
+				"ENABLE_HARDENED_RUNTIME" = "NO";
+				"HEADER_SEARCH_PATHS" = "$(SRCROOT)/Core/Include $(SRCROOT)/Core/Bridge";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+				"CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER" = "NO";
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "NO";
+				"GCC_C_LANGUAGE_STANDARD" = "gnu17";
+				"PRODUCT_NAME" = "PagerMac";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "com.pagerpdf.mac";
+				"INFOPLIST_FILE" = "Platform/Mac/Info.plist";
+				"SDKROOT" = "macosx";
+				"SUPPORTED_PLATFORMS" = "macosx";
+				"GENERATE_INFOPLIST_FILE" = "NO";
+				"LD_RUNPATH_SEARCH_PATHS" = "@executable_path/../Frameworks";
+				"OTHER_LDFLAGS" = "-framework AppKit -framework PDFKit -framework CoreText -framework CoreGraphics -framework Foundation -framework UniformTypeIdentifiers -framework QuartzCore -Wl,-export_dynamic";
+				"GCC_SYMBOLS_PRIVATE_EXTERN" = "NO";
+				"COMBINE_HIDPI_IMAGES" = "YES";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf";
+				"GCC_OPTIMIZATION_LEVEL" = "0";
+				"ONLY_ACTIVE_ARCH" = "YES";
+				"MTL_ENABLE_DEBUG_INFO" = "INCLUDE_SOURCE";
+				"ENABLE_NS_ASSERTIONS" = "YES";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "";
+				"GCC_PREPROCESSOR_DEFINITIONS" = "DEBUG=1";
+			};
+		};
+		A10000000000000000001063 /* XCBuildConfiguration */ = {
+			isa = XCBuildConfiguration;
+			name = "Release";
+			buildSettings = {
+				"CLANG_CXX_LANGUAGE_STANDARD" = "c++20";
+				"CLANG_CXX_LIBRARY" = "libc++";
+				"GCC_ENABLE_CPP_EXCEPTIONS" = "NO";
+				"GCC_ENABLE_CPP_RTTI" = "NO";
+				"CLANG_ENABLE_OBJC_ARC" = "YES";
+				"CLANG_ENABLE_MODULES" = "YES";
+				"CODE_SIGNING_ALLOWED" = "NO";
+				"CODE_SIGN_IDENTITY" = "";
+				"ENABLE_HARDENED_RUNTIME" = "NO";
+				"HEADER_SEARCH_PATHS" = "$(SRCROOT)/Core/Include $(SRCROOT)/Core/Bridge";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+				"CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER" = "NO";
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "NO";
+				"GCC_C_LANGUAGE_STANDARD" = "gnu17";
+				"PRODUCT_NAME" = "PagerMac";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "com.pagerpdf.mac";
+				"INFOPLIST_FILE" = "Platform/Mac/Info.plist";
+				"SDKROOT" = "macosx";
+				"SUPPORTED_PLATFORMS" = "macosx";
+				"GENERATE_INFOPLIST_FILE" = "NO";
+				"LD_RUNPATH_SEARCH_PATHS" = "@executable_path/../Frameworks";
+				"OTHER_LDFLAGS" = "-framework AppKit -framework PDFKit -framework CoreText -framework CoreGraphics -framework Foundation -framework UniformTypeIdentifiers -framework QuartzCore -Wl,-export_dynamic";
+				"GCC_SYMBOLS_PRIVATE_EXTERN" = "NO";
+				"COMBINE_HIDPI_IMAGES" = "YES";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
+				"GCC_OPTIMIZATION_LEVEL" = "s";
+				"ONLY_ACTIVE_ARCH" = "NO";
+				"MTL_ENABLE_DEBUG_INFO" = "NO";
+				"ENABLE_NS_ASSERTIONS" = "NO";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "";
+			};
+		};
+		A10000000000000000001064 /* XCBuildConfiguration */ = {
+			isa = XCBuildConfiguration;
+			name = "Debug";
+			buildSettings = {
+				"CLANG_CXX_LANGUAGE_STANDARD" = "c++20";
+				"CLANG_CXX_LIBRARY" = "libc++";
+				"GCC_ENABLE_CPP_EXCEPTIONS" = "NO";
+				"GCC_ENABLE_CPP_RTTI" = "NO";
+				"CLANG_ENABLE_OBJC_ARC" = "YES";
+				"CLANG_ENABLE_MODULES" = "YES";
+				"CODE_SIGNING_ALLOWED" = "NO";
+				"CODE_SIGN_IDENTITY" = "";
+				"ENABLE_HARDENED_RUNTIME" = "NO";
+				"HEADER_SEARCH_PATHS" = "$(SRCROOT)/Core/Include $(SRCROOT)/Core/Bridge";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+				"CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER" = "NO";
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "NO";
+				"GCC_C_LANGUAGE_STANDARD" = "gnu17";
+				"PRODUCT_NAME" = "PagerPad";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "com.pagerpdf.pad";
+				"INFOPLIST_FILE" = "Platform/Pad/Info.plist";
+				"SDKROOT" = "iphoneos";
+				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator";
+				"TARGETED_DEVICE_FAMILY" = "2";
+				"GENERATE_INFOPLIST_FILE" = "NO";
+				"LD_RUNPATH_SEARCH_PATHS" = "@executable_path/Frameworks";
+				"OTHER_LDFLAGS" = "-framework UIKit -framework PDFKit -framework CoreText -framework CoreGraphics -framework Foundation -framework UniformTypeIdentifiers -framework QuartzCore";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf";
+				"GCC_OPTIMIZATION_LEVEL" = "0";
+				"ONLY_ACTIVE_ARCH" = "YES";
+				"MTL_ENABLE_DEBUG_INFO" = "INCLUDE_SOURCE";
+				"ENABLE_NS_ASSERTIONS" = "YES";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "";
+				"GCC_PREPROCESSOR_DEFINITIONS" = "DEBUG=1";
+			};
+		};
+		A10000000000000000001065 /* XCBuildConfiguration */ = {
+			isa = XCBuildConfiguration;
+			name = "Release";
+			buildSettings = {
+				"CLANG_CXX_LANGUAGE_STANDARD" = "c++20";
+				"CLANG_CXX_LIBRARY" = "libc++";
+				"GCC_ENABLE_CPP_EXCEPTIONS" = "NO";
+				"GCC_ENABLE_CPP_RTTI" = "NO";
+				"CLANG_ENABLE_OBJC_ARC" = "YES";
+				"CLANG_ENABLE_MODULES" = "YES";
+				"CODE_SIGNING_ALLOWED" = "NO";
+				"CODE_SIGN_IDENTITY" = "";
+				"ENABLE_HARDENED_RUNTIME" = "NO";
+				"HEADER_SEARCH_PATHS" = "$(SRCROOT)/Core/Include $(SRCROOT)/Core/Bridge";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+				"CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER" = "NO";
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "NO";
+				"GCC_C_LANGUAGE_STANDARD" = "gnu17";
+				"PRODUCT_NAME" = "PagerPad";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "com.pagerpdf.pad";
+				"INFOPLIST_FILE" = "Platform/Pad/Info.plist";
+				"SDKROOT" = "iphoneos";
+				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator";
+				"TARGETED_DEVICE_FAMILY" = "2";
+				"GENERATE_INFOPLIST_FILE" = "NO";
+				"LD_RUNPATH_SEARCH_PATHS" = "@executable_path/Frameworks";
+				"OTHER_LDFLAGS" = "-framework UIKit -framework PDFKit -framework CoreText -framework CoreGraphics -framework Foundation -framework UniformTypeIdentifiers -framework QuartzCore";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
+				"GCC_OPTIMIZATION_LEVEL" = "s";
+				"ONLY_ACTIVE_ARCH" = "NO";
+				"MTL_ENABLE_DEBUG_INFO" = "NO";
+				"ENABLE_NS_ASSERTIONS" = "NO";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "";
+			};
+		};
+		A10000000000000000001066 /* XCBuildConfiguration */ = {
+			isa = XCBuildConfiguration;
+			name = "Debug";
+			buildSettings = {
+				"CLANG_CXX_LANGUAGE_STANDARD" = "c++20";
+				"CLANG_CXX_LIBRARY" = "libc++";
+				"GCC_ENABLE_CPP_EXCEPTIONS" = "NO";
+				"GCC_ENABLE_CPP_RTTI" = "NO";
+				"CLANG_ENABLE_OBJC_ARC" = "YES";
+				"CLANG_ENABLE_MODULES" = "YES";
+				"CODE_SIGNING_ALLOWED" = "NO";
+				"CODE_SIGN_IDENTITY" = "";
+				"ENABLE_HARDENED_RUNTIME" = "NO";
+				"HEADER_SEARCH_PATHS" = "$(SRCROOT)/Core/Include $(SRCROOT)/Core/Bridge $(SRCROOT)/Platform/Mac";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+				"CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER" = "NO";
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "NO";
+				"GCC_C_LANGUAGE_STANDARD" = "gnu17";
+				"PRODUCT_NAME" = "PagerCoreTests";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "com.pagerpdf.tests";
+				"SDKROOT" = "macosx";
+				"SUPPORTED_PLATFORMS" = "macosx";
+				"GENERATE_INFOPLIST_FILE" = "YES";
+				"BUNDLE_LOADER" = "$(TEST_HOST)";
+				"TEST_HOST" = "$(BUILT_PRODUCTS_DIR)/PagerMac.app/Contents/MacOS/PagerMac";
+				"LD_RUNPATH_SEARCH_PATHS" = "@loader_path/../Frameworks @executable_path/../Frameworks";
+				"OTHER_LDFLAGS" = "-framework XCTest -framework AppKit -framework PDFKit -framework CoreText -framework CoreGraphics -framework QuartzCore -framework Foundation -Wl,-undefined,dynamic_lookup";
+				"SKIP_INSTALL" = "YES";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf";
+				"GCC_OPTIMIZATION_LEVEL" = "0";
+				"ONLY_ACTIVE_ARCH" = "YES";
+				"MTL_ENABLE_DEBUG_INFO" = "INCLUDE_SOURCE";
+				"ENABLE_NS_ASSERTIONS" = "YES";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "";
+				"GCC_PREPROCESSOR_DEFINITIONS" = "DEBUG=1";
+			};
+		};
+		A10000000000000000001067 /* XCBuildConfiguration */ = {
+			isa = XCBuildConfiguration;
+			name = "Release";
+			buildSettings = {
+				"CLANG_CXX_LANGUAGE_STANDARD" = "c++20";
+				"CLANG_CXX_LIBRARY" = "libc++";
+				"GCC_ENABLE_CPP_EXCEPTIONS" = "NO";
+				"GCC_ENABLE_CPP_RTTI" = "NO";
+				"CLANG_ENABLE_OBJC_ARC" = "YES";
+				"CLANG_ENABLE_MODULES" = "YES";
+				"CODE_SIGNING_ALLOWED" = "NO";
+				"CODE_SIGN_IDENTITY" = "";
+				"ENABLE_HARDENED_RUNTIME" = "NO";
+				"HEADER_SEARCH_PATHS" = "$(SRCROOT)/Core/Include $(SRCROOT)/Core/Bridge $(SRCROOT)/Platform/Mac";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+				"CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER" = "NO";
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "NO";
+				"GCC_C_LANGUAGE_STANDARD" = "gnu17";
+				"PRODUCT_NAME" = "PagerCoreTests";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "com.pagerpdf.tests";
+				"SDKROOT" = "macosx";
+				"SUPPORTED_PLATFORMS" = "macosx";
+				"GENERATE_INFOPLIST_FILE" = "YES";
+				"BUNDLE_LOADER" = "$(TEST_HOST)";
+				"TEST_HOST" = "$(BUILT_PRODUCTS_DIR)/PagerMac.app/Contents/MacOS/PagerMac";
+				"LD_RUNPATH_SEARCH_PATHS" = "@loader_path/../Frameworks @executable_path/../Frameworks";
+				"OTHER_LDFLAGS" = "-framework XCTest -framework AppKit -framework PDFKit -framework CoreText -framework CoreGraphics -framework QuartzCore -framework Foundation -Wl,-undefined,dynamic_lookup";
+				"SKIP_INSTALL" = "YES";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
+				"GCC_OPTIMIZATION_LEVEL" = "s";
+				"ONLY_ACTIVE_ARCH" = "NO";
+				"MTL_ENABLE_DEBUG_INFO" = "NO";
+				"ENABLE_NS_ASSERTIONS" = "NO";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "";
+			};
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A1000000000000000000105D /* XCConfigurationList */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				"A1000000000000000000105E",
+				"A1000000000000000000105F",
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Debug";
+		};
+		A10000000000000000001059 /* XCConfigurationList */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				"A10000000000000000001060",
+				"A10000000000000000001061",
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Debug";
+		};
+		A1000000000000000000105A /* XCConfigurationList */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				"A10000000000000000001062",
+				"A10000000000000000001063",
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Debug";
+		};
+		A1000000000000000000105B /* XCConfigurationList */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				"A10000000000000000001064",
+				"A10000000000000000001065",
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Debug";
+		};
+		A1000000000000000000105C /* XCConfigurationList */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				"A10000000000000000001066",
+				"A10000000000000000001067",
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Debug";
+		};
+/* End XCConfigurationList section */
+
+	};
+	rootObject = A1000000000000000000104C /* Project object */;
+}
