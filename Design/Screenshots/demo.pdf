@@ -1,0 +1,294 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R 7 0 R 9 0 R 11 0 R 13 0 R 15 0 R] /Count 6 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 922 >>
+stream
+BT
+/F1 11 Tf
+0.45 0.45 0.48 rg
+64 736 Td (PAGERPDF  ·  FIELD NOTES) Tj
+0 -22 Td
+0.12 0.12 0.14 rg
+/F2 26 Tf
+(Reading on paper, again) Tj
+0 -20 Td
+/F1 13 Tf
+0.55 0.45 0.12 rg
+(A short field note) Tj
+0.16 0.16 0.18 rg
+/F1 12.5 Tf
+0 -36 Td
+(PagerPDF is a reader first. Pages stay in PDF points; pinch zoom is a view) Tj
+0 -18 Td
+(transform, so type stays sharp while you move. The desk is a single gray,) Tj
+0 -18 Td
+(and tiles refine under your fingers instead of flashing empty paper.) Tj
+0 -18 Td
+() Tj
+0 -18 Td
+(This paragraph is meant to be highlighted. Drag across the line and the) Tj
+0 -18 Td
+(mark is the markup itself ? yellow, not a blue selection overlay.) Tj
+0 -18 Td
+() Tj
+0 -18 Td
+(Search, outline, and thumbnails sit beside the page. Notes never rewrite) Tj
+0 -18 Td
+(the original file. They live in a sidecar until you choose to export.) Tj
+0 -18 Td
+ET
+BT /F1 10 Tf 0.55 0.55 0.58 rg 64 48 Td
+(1  /  6) Tj ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 8 0 R >>
+endobj
+8 0 obj
+<< /Length 882 >>
+stream
+BT
+/F1 11 Tf
+0.45 0.45 0.48 rg
+64 736 Td (PAGERPDF  ·  FIELD NOTES) Tj
+0 -22 Td
+0.12 0.12 0.14 rg
+/F2 26 Tf
+(Two pages, one glance) Tj
+0 -20 Td
+/F1 13 Tf
+0.55 0.45 0.12 rg
+(Spreads and continuous rows) Tj
+0.16 0.16 0.18 rg
+/F1 12.5 Tf
+0 -36 Td
+(Facing pages are a layout, not a second renderer. A ViewSpec names how) Tj
+0 -18 Td
+(many columns and rows to show, and whether an axis is continuous.) Tj
+0 -18 Td
+() Tj
+0 -18 Td
+(Single page replaces the sheet when you step next. Two-page continuous) Tj
+0 -18 Td
+(keeps every spread in one scroll. Horizontal scroll fits the row to the) Tj
+0 -18 Td
+(height of the window and lets you pan sideways.) Tj
+0 -18 Td
+() Tj
+0 -18 Td
+(Underline this sentence. A cover-alone option keeps page one on its own) Tj
+0 -18 Td
+(before pairing 2?3, 4?5, the way a bound book does.) Tj
+0 -18 Td
+ET
+BT /F1 10 Tf 0.55 0.55 0.58 rg 64 48 Td
+(2  /  6) Tj ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 10 0 R >>
+endobj
+10 0 obj
+<< /Length 911 >>
+stream
+BT
+/F1 11 Tf
+0.45 0.45 0.48 rg
+64 736 Td (PAGERPDF  ·  FIELD NOTES) Tj
+0 -22 Td
+0.12 0.12 0.14 rg
+/F2 26 Tf
+(Ink that stays put) Tj
+0 -20 Td
+/F1 13 Tf
+0.55 0.45 0.12 rg
+(Pen, marker, and erase) Tj
+0.16 0.16 0.18 rg
+/F1 12.5 Tf
+0 -36 Td
+(A pen stroke is a ribbon. Pressure, tilt, and speed feed a ballpoint that) Tj
+0 -18 Td
+(does not wobble when the pencil pauses. The marker is wide and translucent.) Tj
+0 -18 Td
+() Tj
+0 -18 Td
+(The eraser sweeps a capsule between samples so a fast swipe cannot skip) Tj
+0 -18 Td
+(the ink between recorded points. Cut ends stay square ? a partial erase) Tj
+0 -18 Td
+(does not grow pointed tips in the middle of a word.) Tj
+0 -18 Td
+() Tj
+0 -18 Td
+(Draw over this block. After you zoom, the stroke should still sit on the) Tj
+0 -18 Td
+(letters, because annotation tiles are independent of the PDF workers.) Tj
+0 -18 Td
+ET
+BT /F1 10 Tf 0.55 0.55 0.58 rg 64 48 Td
+(3  /  6) Tj ET
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 12 0 R >>
+endobj
+12 0 obj
+<< /Length 803 >>
+stream
+BT
+/F1 11 Tf
+0.45 0.45 0.48 rg
+64 736 Td (PAGERPDF  ·  FIELD NOTES) Tj
+0 -22 Td
+0.12 0.12 0.14 rg
+/F2 26 Tf
+(Shapes and text boxes) Tj
+0 -20 Td
+/F1 13 Tf
+0.55 0.45 0.12 rg
+(Insert without leaving the page) Tj
+0.16 0.16 0.18 rg
+/F1 12.5 Tf
+0 -36 Td
+(Rectangles, ovals, and lines are click-drag shapes. A text box is typed) Tj
+0 -18 Td
+(in place. Empty boxes do not linger in undo history.) Tj
+0 -18 Td
+() Tj
+0 -18 Td
+(Color and size chips are defined once in the shared palette, so the iPad) Tj
+0 -18 Td
+(dock and the Mac markup bar offer the same choices.) Tj
+0 -18 Td
+() Tj
+0 -18 Td
+(On iPad, fingers pan and markup. Apple Pencil is required for pen,) Tj
+0 -18 Td
+(marker, eraser, and insert. The simulator lets a finger stand in.) Tj
+0 -18 Td
+ET
+BT /F1 10 Tf 0.55 0.55 0.58 rg 64 48 Td
+(4  /  6) Tj ET
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 14 0 R >>
+endobj
+14 0 obj
+<< /Length 782 >>
+stream
+BT
+/F1 11 Tf
+0.45 0.45 0.48 rg
+64 736 Td (PAGERPDF  ·  FIELD NOTES) Tj
+0 -22 Td
+0.12 0.12 0.14 rg
+/F2 26 Tf
+(Look up, then search) Tj
+0 -20 Td
+/F1 13 Tf
+0.55 0.45 0.12 rg
+(Selection extras) Tj
+0.16 0.16 0.18 rg
+/F1 12.5 Tf
+0 -36 Td
+(Force-click a word on Mac to look it up. If you already selected a phrase,) Tj
+0 -18 Td
+(Look Up uses that phrase ? it does not collapse it to a PDFKit word.) Tj
+0 -18 Td
+(Holding the click does not reopen the dictionary.) Tj
+0 -18 Td
+() Tj
+0 -18 Td
+(Search with Google is on the context menu, the Edit menu, and the iPad) Tj
+0 -18 Td
+(edit menu. The query is exactly the current selection.) Tj
+0 -18 Td
+() Tj
+0 -18 Td
+(Control-Command-D does the same Look Up as a force click.) Tj
+0 -18 Td
+ET
+BT /F1 10 Tf 0.55 0.55 0.58 rg 64 48 Td
+(5  /  6) Tj ET
+endstream
+endobj
+15 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 16 0 R >>
+endobj
+16 0 obj
+<< /Length 796 >>
+stream
+BT
+/F1 11 Tf
+0.45 0.45 0.48 rg
+64 736 Td (PAGERPDF  ·  FIELD NOTES) Tj
+0 -22 Td
+0.12 0.12 0.14 rg
+/F2 26 Tf
+(Sidecar notes) Tj
+0 -20 Td
+/F1 13 Tf
+0.55 0.45 0.12 rg
+(The PDF stays yours) Tj
+0.16 0.16 0.18 rg
+/F1 12.5 Tf
+0 -36 Td
+(Saves are a property list of annotations. Geometry is stored as number) Tj
+0 -18 Td
+(arrays so values round-trip at full double precision.) Tj
+0 -18 Td
+() Tj
+0 -18 Td
+(Write is debounced and off the main thread. The sidecar sits next to the) Tj
+0 -18 Td
+(PDF; a copy also lives in Application Support if the folder is read-only.) Tj
+0 -18 Td
+() Tj
+0 -18 Td
+(Export burns everything into a flattened PDF. Until then, the original) Tj
+0 -18 Td
+(bytes are left alone ? the way Skim keeps its notes.) Tj
+0 -18 Td
+ET
+BT /F1 10 Tf 0.55 0.55 0.58 rg 64 48 Td
+(6  /  6) Tj ET
+endstream
+endobj
+xref
+0 17
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000148 00000 n 
+0000000218 00000 n 
+0000000293 00000 n 
+0000000429 00000 n 
+0000001402 00000 n 
+0000001538 00000 n 
+0000002471 00000 n 
+0000002608 00000 n 
+0000003571 00000 n 
+0000003709 00000 n 
+0000004564 00000 n 
+0000004702 00000 n 
+0000005536 00000 n 
+0000005674 00000 n 
+trailer << /Size 17 /Root 1 0 R >>
+startxref
+6522
+%%EOF
