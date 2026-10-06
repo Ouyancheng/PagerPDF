@@ -23,6 +23,35 @@ namespace {
 NSString *const kPagerSidebarVisibleKey = @"PagerSidebarVisible";
 NSString *const kPagerChromeVisibleKey = @"PagerChromeVisible";
 NSString *const kPagerDockEdgeKey = @"PagerDockEdge";
+NSString *const kViewColumnsKey = @"PagerViewColumns";
+NSString *const kViewRowsKey = @"PagerViewRows";
+NSString *const kViewCoverKey = @"PagerViewCoverAlone";
+
+pager::ViewSpec LoadViewSpec() {
+    NSUserDefaults *defaults = NSUserDefaults.standardUserDefaults;
+    pager::ViewSpec spec;
+    if ([defaults objectForKey:kViewColumnsKey] != nil) {
+        spec.columns = static_cast<int>([defaults integerForKey:kViewColumnsKey]);
+    }
+    if ([defaults objectForKey:kViewRowsKey] != nil) {
+        spec.rows = static_cast<int>([defaults integerForKey:kViewRowsKey]);
+    }
+    spec.coverAlone = [defaults boolForKey:kViewCoverKey];
+    return spec.normalized();
+}
+
+void SaveViewSpec(pager::ViewSpec spec) {
+    spec = spec.normalized();
+    NSUserDefaults *defaults = NSUserDefaults.standardUserDefaults;
+    [defaults setInteger:spec.columns forKey:kViewColumnsKey];
+    [defaults setInteger:spec.rows forKey:kViewRowsKey];
+    [defaults setBool:spec.coverAlone forKey:kViewCoverKey];
+}
+
+BOOL ViewSpecMatches(pager::ViewSpec spec, int columns, int rows) {
+    spec = spec.normalized();
+    return spec.columns == columns && spec.rows == rows;
+}
 
 enum {
     kToolsetRead = 0,
@@ -305,6 +334,16 @@ NSInteger ToolsetForTool(pager::Tool tool) {
 
 @end
 
+@interface ViewerViewController ()
+- (void)applyViewSpec:(pager::ViewSpec)spec;
+- (void)applyViewPresetColumns:(int)columns rows:(int)rows;
+- (void)toggleCoverAlone;
+- (void)showCustomLayout;
+- (void)revealPage:(int)page;
+- (void)fitToView:(id)sender;
+- (CGFloat)fitViewZoom;
+@end
+
 @implementation ViewerViewController {
     PadDocument *_document;
     UIScrollView *_scrollView;
@@ -356,6 +395,7 @@ NSInteger ToolsetForTool(pager::Tool tool) {
     UITapGestureRecognizer *_doubleTap;
     CGPoint _dockDragOrigin;
     BOOL _needsFitWidth;
+    BOOL _fitsView;
     BOOL _exporting;
     std::uint64_t _notesTableRevision;
     __weak PadDocument *_notesTableDocument;
@@ -391,6 +431,7 @@ NSInteger ToolsetForTool(pager::Tool tool) {
                     : kDockBottom;
     _sidebarVisible = DefaultFlag(kPagerSidebarVisibleKey, NO);
     _chromeVisible = DefaultFlag(kPagerChromeVisibleKey, YES);
+    _fitsView = YES;
 
     UIPencilInteraction *pencilInteraction = [[UIPencilInteraction alloc] init];
     pencilInteraction.delegate = (id<UIPencilInteractionDelegate>)self;
@@ -406,6 +447,8 @@ NSInteger ToolsetForTool(pager::Tool tool) {
     _scrollView.minimumZoomScale = 0.25;
     _scrollView.maximumZoomScale = 8;
     _scrollView.bouncesZoom = YES;
+    _scrollView.alwaysBounceHorizontal = YES;
+    _scrollView.alwaysBounceVertical = YES;
     _scrollView.panGestureRecognizer.allowedTouchTypes = @[@(UITouchTypeDirect), @(UITouchTypeIndirect)];
     _zoomContent = [[UIView alloc] initWithFrame:CGRectZero];
     _zoomContent.backgroundColor = CanvasColor();
@@ -737,9 +780,16 @@ NSInteger ToolsetForTool(pager::Tool tool) {
     [self updateWindowControlInsets];
     [self restoreChromeCorners];
     [_canvas updateOverlay];
-    if (_needsFitWidth && _document != nil && _scrollView.bounds.size.width >= 32) {
+    if (_document != nil && _scrollView.bounds.size.width >= 32 && _needsFitWidth) {
         _needsFitWidth = NO;
-        [self fitWidth:nil];
+        [self fitToView:nil];
+    } else if (_document != nil && _fitsView && _scrollView.bounds.size.width >= 32) {
+        const CGFloat fit = [self fitViewZoom];
+        if (std::fabs(_scrollView.zoomScale - fit) > 1e-3) {
+            [_scrollView setZoomScale:fit animated:NO];
+            _document.session.viewport().setScale(fit);
+        }
+        [self updateZoomCentering];
     } else if (_document != nil) {
         [self updateZoomCentering];
     }
@@ -836,6 +886,7 @@ NSInteger ToolsetForTool(pager::Tool tool) {
         const CGFloat scale = strongSelf.view.window.windowScene.screen.scale;
         document.session.viewport().setScreenScale(scale > 0 ? scale : 2);
         [strongSelf->_scrollView setZoomScale:1 animated:NO];
+        document.session.setViewSpec(LoadViewSpec());
         [strongSelf->_canvas attachToDocument:document];
         [strongSelf->_outlineTable reloadData];
         [strongSelf->_notesTable reloadData];
@@ -1021,10 +1072,33 @@ NSInteger ToolsetForTool(pager::Tool tool) {
     UIAction *fit = item(@"Fit Width", @"arrow.up.left.and.arrow.down.right", hasDoc, NO, ^(ViewerViewController *self_) {
         [self_ fitWidth:self_];
     });
+    const pager::ViewSpec spec = hasDoc ? _document.session.viewSpec() : pager::ViewSpec{};
+    UIAction * (^layoutItem)(NSString *, NSString *, int, int) = ^(NSString *title, NSString *symbol, int columns, int rows) {
+        UIAction *action = item(title, symbol, hasDoc, NO, ^(ViewerViewController *self_) {
+            [self_ applyViewPresetColumns:columns rows:rows];
+        });
+        action.state = hasDoc && ViewSpecMatches(spec, columns, rows) ? UIMenuElementStateOn : UIMenuElementStateOff;
+        return action;
+    };
+    UIAction *continuous = layoutItem(@"Continuous Scroll", @"rectangle.split.1x2", 1, pager::ViewSpec::kContinuous);
+    UIAction *single = layoutItem(@"Single Page", @"rectangle.portrait", 1, 1);
+    UIAction *twoPage = layoutItem(@"Two Pages", @"rectangle.split.2x1", 2, 1);
+    UIAction *twoCont = layoutItem(@"Two Pages Continuous", @"square.split.2x1", 2, pager::ViewSpec::kContinuous);
+    UIAction *horizontal = layoutItem(@"Horizontal Scroll", @"arrow.left.and.right", pager::ViewSpec::kContinuous, 1);
+    UIAction *cover = item(@"Show Cover Page Alone", @"book", hasDoc && spec.normalized().columns >= 2, NO,
+                           ^(ViewerViewController *self_) {
+                               [self_ toggleCoverAlone];
+                           });
+    cover.state = spec.coverAlone ? UIMenuElementStateOn : UIMenuElementStateOff;
+    UIAction *custom = item(@"Custom Layout…", @"square.grid.3x3", hasDoc, NO, ^(ViewerViewController *self_) {
+        [self_ showCustomLayout];
+    });
     return @[
         [UIMenu menuWithTitle:@"" image:nil identifier:nil options:UIMenuOptionsDisplayInline children:@[open, sample]],
         [UIMenu menuWithTitle:@"" image:nil identifier:nil options:UIMenuOptionsDisplayInline children:@[undo, redo, del]],
         [UIMenu menuWithTitle:@"" image:nil identifier:nil options:UIMenuOptionsDisplayInline children:@[flatten, fit]],
+        [UIMenu menuWithTitle:@"View" image:nil identifier:nil options:0
+                     children:@[continuous, single, twoPage, twoCont, horizontal, cover, custom]],
     ];
 }
 
@@ -1539,12 +1613,19 @@ NSInteger ToolsetForTool(pager::Tool tool) {
     int found = -1;
     double best = 1e12;
     for (const pager::PageFrame &frame : layout.pages()) {
-        double distance = 0;
-        if (point.y < frame.frame.y) {
-            distance = frame.frame.y - point.y;
-        } else if (point.y > frame.frame.y + frame.frame.height) {
-            distance = point.y - (frame.frame.y + frame.frame.height);
+        double dx = 0;
+        double dy = 0;
+        if (point.x < frame.frame.x) {
+            dx = frame.frame.x - point.x;
+        } else if (point.x > frame.frame.x + frame.frame.width) {
+            dx = point.x - (frame.frame.x + frame.frame.width);
         }
+        if (point.y < frame.frame.y) {
+            dy = frame.frame.y - point.y;
+        } else if (point.y > frame.frame.y + frame.frame.height) {
+            dy = point.y - (frame.frame.y + frame.frame.height);
+        }
+        const double distance = std::hypot(dx, dy);
         if (distance < best) {
             best = distance;
             found = frame.index;
@@ -1557,19 +1638,28 @@ NSInteger ToolsetForTool(pager::Tool tool) {
     if (_document == nil) {
         return -1;
     }
-    const pager::Layout &layout = _document.session.viewport().layout();
+    pager::DocumentSession &session = _document.session;
+    if (session.viewSpec().isPaged()) {
+        const int first = pager::FirstPageOfSheet(session.viewSheet(), session.pageCount(), session.viewSpec());
+        const int count = pager::PagesOnSheet(session.viewSheet(), session.pageCount(), session.viewSpec());
+        if (session.focusedPage() >= first && session.focusedPage() < first + count) {
+            return session.focusedPage();
+        }
+        return first;
+    }
+    const pager::Layout &layout = session.viewport().layout();
     const CGFloat zoom = std::max(0.05, _scrollView.zoomScale);
+    const double x0 = _scrollView.contentOffset.x / zoom;
     const double y0 = _scrollView.contentOffset.y / zoom;
+    const double x1 = (_scrollView.contentOffset.x + _scrollView.bounds.size.width) / zoom;
     const double y1 = (_scrollView.contentOffset.y + _scrollView.bounds.size.height) / zoom;
-    const double x = (_scrollView.contentOffset.x + _scrollView.bounds.size.width * 0.5) / zoom;
     int best = -1;
     double bestVisible = 0;
-    const pager::Size content = layout.contentSize();
-    for (const int index : layout.pagesIntersecting(pager::Rect{0, y0, std::max(1.0, content.width), std::max(1.0, y1 - y0)})) {
+    for (const int index : layout.pagesIntersecting(pager::Rect{x0, y0, std::max(1.0, x1 - x0), std::max(1.0, y1 - y0)})) {
         const pager::Rect frame = layout.pageFrame(index);
-        const double vis0 = std::max(frame.y, y0);
-        const double vis1 = std::min(frame.y + frame.height, y1);
-        const double visible = vis1 - vis0;
+        const double width = std::min(frame.x + frame.width, x1) - std::max(frame.x, x0);
+        const double height = std::min(frame.y + frame.height, y1) - std::max(frame.y, y0);
+        const double visible = std::max(0.0, width) * std::max(0.0, height);
         if (visible > bestVisible) {
             bestVisible = visible;
             best = index;
@@ -1578,7 +1668,7 @@ NSInteger ToolsetForTool(pager::Tool tool) {
     if (best >= 0) {
         return best;
     }
-    return [self pageIndexNearDocumentPoint:pager::Point{x, y0}];
+    return [self pageIndexNearDocumentPoint:pager::Point{(x0 + x1) * 0.5, y0}];
 }
 
 - (void)updatePageLabel {
@@ -1587,7 +1677,10 @@ NSInteger ToolsetForTool(pager::Tool tool) {
         return;
     }
     const int page = [self currentPageIndex];
-    const int count = static_cast<int>(_document.session.viewport().pages().size());
+    const int count = _document.session.pageCount();
+    if (page >= 0) {
+        _document.session.setPage(page);
+    }
     if (page < 0 || count <= 0) {
         _pageLabel.text = [NSString stringWithFormat:@"— / %d", count];
         return;
@@ -1595,21 +1688,119 @@ NSInteger ToolsetForTool(pager::Tool tool) {
     _pageLabel.text = [NSString stringWithFormat:@"%d / %d", page + 1, count];
 }
 
+- (void)syncZoomDocumentFrame {
+    [_scrollView setZoomScale:1 animated:NO];
+    _zoomContent.transform = CGAffineTransformIdentity;
+    [_canvas syncFrameAndTiles];
+    const CGRect frame = _canvas.frame;
+    _zoomContent.bounds = CGRectMake(0, 0, frame.size.width, frame.size.height);
+    _zoomContent.frame = frame;
+}
+
+- (void)applyViewLayout {
+    [self syncZoomDocumentFrame];
+    [_canvas.controller layoutDidChange];
+    [self updatePageLabel];
+}
+
+- (void)applyViewSpec:(pager::ViewSpec)spec {
+    if (_document == nil) {
+        return;
+    }
+    const int page = std::max(0, [self currentPageIndex]);
+    _document.session.setViewSpec(spec);
+    _document.session.setPage(page);
+    SaveViewSpec(spec);
+    _fitsView = YES;
+    [self applyViewLayout];
+    [self fitToView:nil];
+    [self revealPage:_document.session.focusedPage()];
+}
+
+- (void)applyViewPresetColumns:(int)columns rows:(int)rows {
+    pager::ViewSpec spec = _document == nil ? pager::ViewSpec{} : _document.session.viewSpec();
+    spec.columns = columns;
+    spec.rows = rows;
+    [self applyViewSpec:spec];
+}
+
+- (void)toggleCoverAlone {
+    if (_document == nil) {
+        return;
+    }
+    pager::ViewSpec spec = _document.session.viewSpec();
+    spec.coverAlone = !spec.coverAlone;
+    [self applyViewSpec:spec];
+}
+
+- (void)showCustomLayout {
+    if (_document == nil) {
+        return;
+    }
+    const pager::ViewSpec current = _document.session.viewSpec();
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Custom Layout"
+                                                                   message:@"Pages across and down. Use 0 for a continuous axis."
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    [alert addTextFieldWithConfigurationHandler:^(UITextField *field) {
+        field.placeholder = @"Columns";
+        field.keyboardType = UIKeyboardTypeNumberPad;
+        field.text = [NSString stringWithFormat:@"%d", current.columns];
+    }];
+    [alert addTextFieldWithConfigurationHandler:^(UITextField *field) {
+        field.placeholder = @"Rows";
+        field.keyboardType = UIKeyboardTypeNumberPad;
+        field.text = [NSString stringWithFormat:@"%d", current.rows];
+    }];
+    __weak ViewerViewController *weakSelf = self;
+    [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Apply" style:UIAlertActionStyleDefault handler:^(UIAlertAction *) {
+        ViewerViewController *self_ = weakSelf;
+        if (self_ == nil || self_->_document == nil) {
+            return;
+        }
+        pager::ViewSpec spec = current;
+        spec.columns = std::max(0, alert.textFields.firstObject.text.intValue);
+        spec.rows = std::max(0, alert.textFields.lastObject.text.intValue);
+        [self_ applyViewSpec:spec];
+    }]];
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
+- (void)revealPage:(int)page {
+    if (_document == nil) {
+        return;
+    }
+    const pager::Rect frame = _document.session.viewport().layout().pageFrame(page);
+    if (frame.empty()) {
+        return;
+    }
+    [self scrollDocumentPoint:pager::Point{frame.x + frame.width * 0.5, frame.y} toViewportY:8];
+}
+
 - (void)stepPage:(NSInteger)delta {
     if (_document == nil) {
         return;
     }
-    const int count = static_cast<int>(_document.session.viewport().pages().size());
-    if (count <= 0) {
+    pager::DocumentSession &session = _document.session;
+    if (session.pageCount() <= 0) {
+        return;
+    }
+    if (session.viewSpec().isPaged()) {
+        session.setViewSheet(session.viewSheet() + static_cast<int>(delta));
+        [self applyViewLayout];
+        if (_fitsView) {
+            [self fitToView:nil];
+        }
+        [self revealPage:session.focusedPage()];
         return;
     }
     int page = [self currentPageIndex];
     if (page < 0) {
         page = 0;
     }
-    page = std::clamp(page + static_cast<int>(delta), 0, count - 1);
-    const pager::Rect frame = _document.session.viewport().layout().pageFrame(page);
-    [self scrollDocumentPoint:pager::Point{frame.x + frame.width * 0.5, frame.y} toViewportY:8];
+    page = std::clamp(page + static_cast<int>(delta), 0, session.pageCount() - 1);
+    session.setPage(page);
+    [self revealPage:page];
 }
 
 - (void)previousPage:(id)sender {
@@ -1621,47 +1812,44 @@ NSInteger ToolsetForTool(pager::Tool tool) {
 }
 
 - (CGFloat)fitWidthZoom {
-    if (_document == nil || _scrollView.bounds.size.width < 32) {
+    return [self fitViewZoom];
+}
+
+- (CGFloat)fitViewZoom {
+    if (_document == nil || _scrollView.bounds.size.width < 32 || _scrollView.bounds.size.height < 32) {
         return 1;
     }
     const pager::Size content = _document.session.viewport().layout().contentSize();
-    if (content.width <= 1) {
+    const BOOL fitHeight = _document.session.viewSpec().prefersFitHeight();
+    const double along = fitHeight ? content.height : content.width;
+    const double view = fitHeight ? _scrollView.bounds.size.height : _scrollView.bounds.size.width;
+    if (along <= 1) {
         return 1;
     }
-    return static_cast<CGFloat>(
-        pager::ClampScale(_scrollView.bounds.size.width / content.width));
+    return static_cast<CGFloat>(pager::ClampScale(view / along));
 }
 
-- (void)fitWidth:(id)sender {
+- (void)fitToView:(id)sender {
     if (_document == nil) {
         return;
-    }
-    int page = [self currentPageIndex];
-    if (page < 0) {
-        page = 0;
     }
     if (_scrollView.bounds.size.width < 32) {
         _needsFitWidth = YES;
         return;
     }
-    const pager::Rect frame = _document.session.viewport().layout().pageFrame(page);
-    const pager::Size content = _document.session.viewport().layout().contentSize();
-    const CGFloat width = content.width > 1 ? content.width : std::max(1.0, frame.width);
-    const CGFloat height =
-        _scrollView.bounds.size.height * width / std::max(1.0, static_cast<double>(_scrollView.bounds.size.width));
-    const CGRect zoomRect = CGRectMake(0, std::max(0.0, frame.y - 8), width, height);
-    if (sender == nil) {
-        [_canvas syncFrameAndTiles];
-        [_scrollView zoomToRect:zoomRect animated:NO];
-        _document.session.viewport().setScale(_scrollView.zoomScale);
-        [self updateZoomCentering];
-        [_canvas updateVisibleRect];
-        [self updatePageLabel];
-        return;
-    }
-    // Do not rewrite the zoom view's frame here: that fights UIScrollView's
-    // live transform and is why Fit Width looked like a no-op or a jump.
-    [_scrollView zoomToRect:zoomRect animated:YES];
+    _fitsView = YES;
+    [self syncZoomDocumentFrame];
+    const CGFloat scale = [self fitViewZoom];
+    const BOOL animated = sender != nil;
+    [_scrollView setZoomScale:scale animated:animated];
+    _document.session.viewport().setScale(_scrollView.zoomScale);
+    [self updateZoomCentering];
+    [_canvas updateVisibleRect];
+    [self updatePageLabel];
+}
+
+- (void)fitWidth:(id)sender {
+    [self fitToView:sender];
 }
 
 - (IBAction)deleteNote:(id)sender {
@@ -1746,6 +1934,7 @@ NSInteger ToolsetForTool(pager::Tool tool) {
     [self updateZoomCentering];
     [self syncViewportZoom:scale];
     [self updatePageLabel];
+    _fitsView = std::fabs(scale - [self fitViewZoom]) < 1e-3;
 }
 
 - (void)handleDoubleTap:(UITapGestureRecognizer *)tap {
@@ -1848,6 +2037,13 @@ NSInteger ToolsetForTool(pager::Tool tool) {
 }
 
 - (void)scrollToPage:(int)page userPoint:(pager::Point)point {
+    if (_document == nil) {
+        return;
+    }
+    _document.session.setPage(page);
+    if (_document.session.viewSpec().isPaged()) {
+        [self applyViewLayout];
+    }
     const pager::PageGeometry *geometry = _document.session.viewport().geometry(page);
     if (geometry == nullptr) {
         return;

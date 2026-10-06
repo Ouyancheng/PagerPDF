@@ -85,6 +85,37 @@ DocumentSession::DocumentSession() {
     }
 }
 
+void DocumentSession::setViewSpec(ViewSpec spec) {
+    spec = spec.normalized();
+    viewport_.setViewSpec(spec);
+    setPage(focusedPage_);
+}
+
+void DocumentSession::setViewSheet(int sheet) {
+    viewport_.setSheet(sheet);
+    const int count = pageCount();
+    if (count <= 0) {
+        focusedPage_ = 0;
+        return;
+    }
+    const int first = FirstPageOfSheet(viewport_.sheet(), count, viewSpec());
+    if (focusedPage_ < first || focusedPage_ >= first + PagesOnSheet(viewport_.sheet(), count, viewSpec())) {
+        focusedPage_ = first;
+    }
+}
+
+void DocumentSession::setPage(int pageIndex) {
+    const int count = pageCount();
+    if (count <= 0) {
+        focusedPage_ = 0;
+        return;
+    }
+    focusedPage_ = std::clamp(pageIndex, 0, count - 1);
+    if (viewSpec().isPaged()) {
+        viewport_.setSheet(SheetForPage(focusedPage_, count, viewSpec()));
+    }
+}
+
 void DocumentSession::setToolStyle(Tool tool, ToolStyle style) {
     const int index = static_cast<int>(tool);
     if (index < 0 || index >= 16) {

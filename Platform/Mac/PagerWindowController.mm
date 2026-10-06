@@ -20,6 +20,78 @@ NSString *const kToolbarZoom = @"pager.zoom";
 NSString *const kToolbarShare = @"pager.share";
 NSString *const kToolbarSearch = @"pager.search";
 NSString *const kSidebarModeKey = @"PagerSidebarMode";
+NSString *const kViewColumnsKey = @"PagerViewColumns";
+NSString *const kViewRowsKey = @"PagerViewRows";
+NSString *const kViewCoverKey = @"PagerViewCoverAlone";
+
+pager::ViewSpec LoadViewSpec() {
+    NSUserDefaults *defaults = NSUserDefaults.standardUserDefaults;
+    pager::ViewSpec spec;
+    if ([defaults objectForKey:kViewColumnsKey] != nil) {
+        spec.columns = static_cast<int>([defaults integerForKey:kViewColumnsKey]);
+    }
+    if ([defaults objectForKey:kViewRowsKey] != nil) {
+        spec.rows = static_cast<int>([defaults integerForKey:kViewRowsKey]);
+    }
+    spec.coverAlone = [defaults boolForKey:kViewCoverKey];
+    return spec.normalized();
+}
+
+void SaveViewSpec(pager::ViewSpec spec) {
+    spec = spec.normalized();
+    NSUserDefaults *defaults = NSUserDefaults.standardUserDefaults;
+    [defaults setInteger:spec.columns forKey:kViewColumnsKey];
+    [defaults setInteger:spec.rows forKey:kViewRowsKey];
+    [defaults setBool:spec.coverAlone forKey:kViewCoverKey];
+}
+
+int ViewPresetTag(pager::ViewSpec spec) {
+    spec = spec.normalized();
+    if (spec.columns == 1 && spec.rows == pager::ViewSpec::kContinuous) {
+        return 1;
+    }
+    if (spec.columns == 1 && spec.rows == 1) {
+        return 2;
+    }
+    if (spec.columns == 2 && spec.rows == 1) {
+        return 3;
+    }
+    if (spec.columns == 2 && spec.rows == pager::ViewSpec::kContinuous) {
+        return 4;
+    }
+    if (spec.continuousX() && spec.rows == 1) {
+        return 5;
+    }
+    return 0;
+}
+
+pager::ViewSpec ViewSpecForPreset(NSInteger tag, bool coverAlone) {
+    pager::ViewSpec spec;
+    spec.coverAlone = coverAlone;
+    switch (tag) {
+        case 2:
+            spec.columns = 1;
+            spec.rows = 1;
+            break;
+        case 3:
+            spec.columns = 2;
+            spec.rows = 1;
+            break;
+        case 4:
+            spec.columns = 2;
+            spec.rows = pager::ViewSpec::kContinuous;
+            break;
+        case 5:
+            spec.columns = pager::ViewSpec::kContinuous;
+            spec.rows = 1;
+            break;
+        default:
+            spec.columns = 1;
+            spec.rows = pager::ViewSpec::kContinuous;
+            break;
+    }
+    return spec.normalized();
+}
 
 enum SidebarMode : NSInteger {
     kSidebarThumbnails = 0,
@@ -628,6 +700,7 @@ NSScrollView *ScrollFor(NSView *documentView) {
     }
     _pagerDocument = pager;
     pager.session.setTool(pager::Tool::Scroll);
+    pager.session.setViewSpec(LoadViewSpec());
     [_canvas attachToDocument:pager];
     [_outlineView reloadData];
     [_notesTable reloadData];
@@ -1153,7 +1226,7 @@ NSScrollView *ScrollFor(NSView *documentView) {
 
 - (void)liveMagnifyEnded:(NSNotification *)notification {
     _magnifying = NO;
-    _fitsWidth = std::fabs(_scrollView.magnification - [self fitWidthMagnification]) < 1e-3;
+    _fitsWidth = std::fabs(_scrollView.magnification - [self fitViewMagnification]) < 1e-3;
     [_canvas visibleRectDidChange];
     [self updatePageLabel];
 }
@@ -1173,9 +1246,9 @@ NSScrollView *ScrollFor(NSView *documentView) {
 // Window resized (including entering or leaving full screen): a fit-width view stays fitted.
 - (void)scrollFrameChanged:(NSNotification *)notification {
     if (_fitsWidth && !_magnifying) {
-        const CGFloat fit = [self fitWidthMagnification];
+        const CGFloat fit = [self fitViewMagnification];
         if (std::fabs(_scrollView.magnification - fit) > 1e-3) {
-            [self setMagnificationKeepingTop:fit];
+            [self setMagnificationFitting:fit];
         }
     }
     [self visibleBoundsChanged:notification];
@@ -1242,13 +1315,22 @@ NSScrollView *ScrollFor(NSView *documentView) {
 }
 
 - (CGFloat)fitWidthMagnification {
+    return [self fitViewMagnification];
+}
+
+- (CGFloat)fitViewMagnification {
     pager::DocumentSession *session = [self session];
     if (session == nullptr) {
         return 1;
     }
     const pager::Size content = session->viewport().layout().contentSize();
-    const CGFloat width = _scrollView.contentView.frame.size.width;
-    return content.width > 1 ? std::clamp<CGFloat>(width / content.width, 0.25, 8) : 1;
+    const NSSize view = _scrollView.contentView.frame.size;
+    const CGFloat insetTop = _scrollView.contentInsets.top;
+    if (session->viewSpec().prefersFitHeight()) {
+        const CGFloat usable = std::max<CGFloat>(1, view.height - insetTop);
+        return content.height > 1 ? std::clamp<CGFloat>(usable / content.height, 0.25, 8) : 1;
+    }
+    return content.width > 1 ? std::clamp<CGFloat>(view.width / content.width, 0.25, 8) : 1;
 }
 
 - (NSPoint)visibleCenter {
@@ -1257,14 +1339,17 @@ NSScrollView *ScrollFor(NSView *documentView) {
 }
 
 - (void)setMagnificationKeepingTop:(CGFloat)magnification {
+    [self setMagnificationFitting:magnification];
+}
+
+- (void)setMagnificationFitting:(CGFloat)magnification {
     pager::DocumentSession *session = [self session];
     if (session == nullptr) {
         return;
     }
-    const NSRect visible = _canvas.visibleRect;
-    [_scrollView setMagnification:magnification centeredAtPoint:NSMakePoint(NSMidX(visible), NSMinY(visible))];
-    const NSRect after = _canvas.visibleRect;
-    [_canvas scrollPoint:NSMakePoint(after.origin.x, NSMinY(visible))];
+    const int page = std::max(0, [self currentPageIndex]);
+    [_scrollView setMagnification:magnification];
+    [self revealPage:page];
 }
 
 - (void)zoomIn:(id)sender {
@@ -1284,7 +1369,7 @@ NSScrollView *ScrollFor(NSView *documentView) {
 
 - (void)zoomToFitWidth:(id)sender {
     _fitsWidth = YES;
-    [self setMagnificationKeepingTop:[self fitWidthMagnification]];
+    [self setMagnificationFitting:[self fitViewMagnification]];
 }
 
 - (void)zoomToFitPage:(id)sender {
@@ -1316,13 +1401,25 @@ NSScrollView *ScrollFor(NSView *documentView) {
     if (session == nullptr) {
         return -1;
     }
+    if (session->viewSpec().isPaged()) {
+        const int first = pager::FirstPageOfSheet(session->viewSheet(), session->pageCount(), session->viewSpec());
+        const int count = pager::PagesOnSheet(session->viewSheet(), session->pageCount(), session->viewSpec());
+        if (session->focusedPage() >= first && session->focusedPage() < first + count) {
+            return session->focusedPage();
+        }
+        return first;
+    }
     const NSRect visible = _canvas.visibleRect;
     const pager::Layout &layout = session->viewport().layout();
     int best = -1;
     double bestVisible = 0;
     for (const int index : layout.pagesIntersecting(pager::Rect{visible.origin.x, visible.origin.y, visible.size.width, visible.size.height})) {
         const pager::Rect frame = layout.pageFrame(index);
-        const double overlap = std::min(frame.y + frame.height, NSMaxY(visible)) - std::max(frame.y, NSMinY(visible));
+        const double width = std::min(frame.x + frame.width, static_cast<double>(NSMaxX(visible))) -
+                             std::max(frame.x, static_cast<double>(NSMinX(visible)));
+        const double height = std::min(frame.y + frame.height, static_cast<double>(NSMaxY(visible))) -
+                              std::max(frame.y, static_cast<double>(NSMinY(visible)));
+        const double overlap = std::max(0.0, width) * std::max(0.0, height);
         if (overlap > bestVisible) {
             bestVisible = overlap;
             best = index;
@@ -1351,6 +1448,9 @@ NSScrollView *ScrollFor(NSView *documentView) {
     _pageHUDLabel.stringValue = count > 0 ? [NSString stringWithFormat:@"%d of %d", std::max(1, page + 1), count] : @"";
     if (page != _currentPage) {
         _currentPage = page;
+        if (page >= 0 && session != nullptr) {
+            session->setPage(page);
+        }
         if (page >= 0 && _thumbnailTable.selectedRow != page && !_syncingSelection) {
             _syncingSelection = YES;
             [_thumbnailTable selectRowIndexes:[NSIndexSet indexSetWithIndex:static_cast<NSUInteger>(page)] byExtendingSelection:NO];
@@ -1362,14 +1462,107 @@ NSScrollView *ScrollFor(NSView *documentView) {
 
 - (void)scrollToDocumentY:(double)y {
     NSClipView *clip = _scrollView.contentView;
+    [self scrollToDocumentPoint:NSMakePoint(clip.bounds.origin.x + clip.bounds.size.width * 0.5, y)];
+}
+
+- (void)scrollToDocumentPoint:(NSPoint)point {
+    NSClipView *clip = _scrollView.contentView;
     const CGFloat insetTop = _scrollView.contentInsets.top / std::max<CGFloat>(0.05, _scrollView.magnification);
-    // Through the clip view so the result may sit inside the top inset (under the toolbar),
-    // which -scrollPoint: clamps away.
-    const NSRect target = [clip constrainBoundsRect:NSMakeRect(clip.bounds.origin.x, y - insetTop, clip.bounds.size.width,
+    const NSRect target = [clip constrainBoundsRect:NSMakeRect(point.x - clip.bounds.size.width * 0.5,
+                                                                point.y - insetTop, clip.bounds.size.width,
                                                                 clip.bounds.size.height)];
     [clip scrollToPoint:target.origin];
     [_scrollView reflectScrolledClipView:clip];
+    [_canvas visibleRectDidChange];
     [self updatePageLabel];
+}
+
+- (void)applyViewLayout {
+    [_canvas syncFrame];
+    [_canvas.controller layoutDidChange];
+    [self updatePageLabel];
+}
+
+- (void)revealPage:(int)page {
+    pager::DocumentSession *session = [self session];
+    if (session == nullptr) {
+        return;
+    }
+    const pager::Rect frame = session->viewport().layout().pageFrame(page);
+    if (frame.empty()) {
+        return;
+    }
+    [self scrollToDocumentPoint:NSMakePoint(frame.x + frame.width * 0.5, frame.y - pager::Layout::kPageGap * 0.5)];
+}
+
+- (void)applyViewSpec:(pager::ViewSpec)spec {
+    pager::DocumentSession *session = [self session];
+    if (session == nullptr) {
+        return;
+    }
+    const int page = std::max(0, [self currentPageIndex]);
+    session->setViewSpec(spec);
+    session->setPage(page);
+    SaveViewSpec(spec);
+    _fitsWidth = YES;
+    [self applyViewLayout];
+    [self setMagnificationFitting:[self fitViewMagnification]];
+}
+
+- (void)selectViewPreset:(NSMenuItem *)item {
+    pager::DocumentSession *session = [self session];
+    const bool cover = session != nullptr && session->viewSpec().coverAlone;
+    [self applyViewSpec:ViewSpecForPreset(item.tag, cover)];
+}
+
+- (void)toggleCoverAlone:(id)sender {
+    pager::DocumentSession *session = [self session];
+    if (session == nullptr) {
+        return;
+    }
+    pager::ViewSpec spec = session->viewSpec();
+    spec.coverAlone = !spec.coverAlone;
+    [self applyViewSpec:spec];
+}
+
+- (void)showCustomLayout:(id)sender {
+    pager::DocumentSession *session = [self session];
+    if (session == nullptr) {
+        return;
+    }
+    const pager::ViewSpec current = session->viewSpec();
+    NSAlert *alert = [[NSAlert alloc] init];
+    alert.messageText = @"Custom Layout";
+    alert.informativeText = @"Set how many pages appear across and down. Check Continuous to scroll that axis.";
+    [alert addButtonWithTitle:@"OK"];
+    [alert addButtonWithTitle:@"Cancel"];
+    NSView *box = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 280, 88)];
+    NSTextField *cols = [NSTextField textFieldWithString:[NSString stringWithFormat:@"%d", std::max(1, current.columns)]];
+    NSTextField *rows = [NSTextField textFieldWithString:[NSString stringWithFormat:@"%d", std::max(1, current.rows)]];
+    cols.frame = NSMakeRect(88, 48, 48, 24);
+    rows.frame = NSMakeRect(88, 16, 48, 24);
+    NSTextField *colsLabel = [NSTextField labelWithString:@"Columns"];
+    NSTextField *rowsLabel = [NSTextField labelWithString:@"Rows"];
+    colsLabel.frame = NSMakeRect(0, 50, 80, 20);
+    rowsLabel.frame = NSMakeRect(0, 18, 80, 20);
+    NSButton *contX = [NSButton checkboxWithTitle:@"Continuous" target:nil action:nil];
+    NSButton *contY = [NSButton checkboxWithTitle:@"Continuous" target:nil action:nil];
+    contX.frame = NSMakeRect(148, 46, 120, 24);
+    contY.frame = NSMakeRect(148, 14, 120, 24);
+    contX.state = current.continuousX() ? NSControlStateValueOn : NSControlStateValueOff;
+    contY.state = current.continuousY() ? NSControlStateValueOn : NSControlStateValueOff;
+    for (NSView *child in @[colsLabel, rowsLabel, cols, rows, contX, contY]) {
+        [box addSubview:child];
+    }
+    alert.accessoryView = box;
+    if ([alert runModal] != NSAlertFirstButtonReturn) {
+        return;
+    }
+    pager::ViewSpec spec;
+    spec.columns = contX.state == NSControlStateValueOn ? pager::ViewSpec::kContinuous : std::max(1, cols.intValue);
+    spec.rows = contY.state == NSControlStateValueOn ? pager::ViewSpec::kContinuous : std::max(1, rows.intValue);
+    spec.coverAlone = current.coverAlone;
+    [self applyViewSpec:spec];
 }
 
 - (void)scrollToPage:(int)page userPoint:(double)x y:(double)y {
@@ -1378,8 +1571,13 @@ NSScrollView *ScrollFor(NSView *documentView) {
     if (geometry == nullptr) {
         return;
     }
-    const pager::Point point = session->viewport().layout().pageViewToDocument(page, pager::UserToPageView(*geometry, pager::Point{x, y}));
-    [self scrollToDocumentY:point.y - 40];
+    session->setPage(page);
+    if (session->viewSpec().isPaged()) {
+        [self applyViewLayout];
+    }
+    const pager::Point point =
+        session->viewport().layout().pageViewToDocument(page, pager::UserToPageView(*geometry, pager::Point{x, y}));
+    [self scrollToDocumentPoint:NSMakePoint(point.x, point.y - 40)];
 }
 
 - (void)goToPageIndex:(int)page {
@@ -1387,19 +1585,47 @@ NSScrollView *ScrollFor(NSView *documentView) {
     if (session == nullptr) {
         return;
     }
-    const int count = static_cast<int>(session->viewport().pages().size());
+    const int count = session->pageCount();
     if (count == 0) {
         return;
     }
     page = std::clamp(page, 0, count - 1);
-    [self scrollToDocumentY:session->viewport().layout().pageFrame(page).y - pager::Layout::kPageGap * 0.5];
+    session->setPage(page);
+    if (session->viewSpec().isPaged()) {
+        [self applyViewLayout];
+    }
+    [self revealPage:page];
+}
+
+- (void)goToSheet:(int)sheet {
+    pager::DocumentSession *session = [self session];
+    if (session == nullptr) {
+        return;
+    }
+    session->setViewSheet(sheet);
+    [self applyViewLayout];
+    if (_fitsWidth) {
+        [self setMagnificationFitting:[self fitViewMagnification]];
+        return;
+    }
+    [self revealPage:session->focusedPage()];
 }
 
 - (void)previousPage:(id)sender {
+    pager::DocumentSession *session = [self session];
+    if (session != nullptr && session->viewSpec().isPaged()) {
+        [self goToSheet:session->viewSheet() - 1];
+        return;
+    }
     [self goToPageIndex:[self currentPageIndex] - 1];
 }
 
 - (void)nextPage:(id)sender {
+    pager::DocumentSession *session = [self session];
+    if (session != nullptr && session->viewSpec().isPaged()) {
+        [self goToSheet:session->viewSheet() + 1];
+        return;
+    }
     [self goToPageIndex:[self currentPageIndex] + 1];
 }
 
@@ -1973,11 +2199,29 @@ NSScrollView *ScrollFor(NSView *documentView) {
     if (action == @selector(searchSelectionOnGoogle:)) {
         return !session->selection().text.empty();
     }
+    if (action == @selector(selectViewPreset:)) {
+        item.state = ViewPresetTag(session->viewSpec()) == item.tag ? NSControlStateValueOn : NSControlStateValueOff;
+        return YES;
+    }
+    if (action == @selector(toggleCoverAlone:)) {
+        item.state = session->viewSpec().coverAlone ? NSControlStateValueOn : NSControlStateValueOff;
+        return session->viewSpec().normalized().columns >= 2;
+    }
+    if (action == @selector(showCustomLayout:)) {
+        item.state = ViewPresetTag(session->viewSpec()) == 0 ? NSControlStateValueOn : NSControlStateValueOff;
+        return YES;
+    }
     if (action == @selector(previousPage:) || action == @selector(firstPage:)) {
+        if (session->viewSpec().isPaged() && action == @selector(previousPage:)) {
+            return session->viewSheet() > 0;
+        }
         return [self currentPageIndex] > 0;
     }
     if (action == @selector(nextPage:) || action == @selector(lastPage:)) {
-        return [self currentPageIndex] + 1 < static_cast<int>(session->viewport().pages().size());
+        if (session->viewSpec().isPaged() && action == @selector(nextPage:)) {
+            return session->viewSheet() + 1 < session->sheetCount();
+        }
+        return [self currentPageIndex] + 1 < session->pageCount();
     }
     if (action == @selector(zoomIn:)) {
         return _scrollView.magnification < 8 - 1e-3;

@@ -33,6 +33,19 @@ public:
     NoteDocument& notes() { return notes_; }
     const NoteDocument& notes() const { return notes_; }
 
+    const ViewSpec& viewSpec() const { return viewport_.viewSpec(); }
+    int viewSheet() const { return viewport_.sheet(); }
+    int focusedPage() const { return focusedPage_; }
+    int pageCount() const { return static_cast<int>(viewport_.pages().size()); }
+    int sheetCount() const { return SheetCount(pageCount(), viewSpec()); }
+    int pagesPerSheet() const { return viewSpec().pagesPerSheet(); }
+    int sheetForPage(int pageIndex) const { return SheetForPage(pageIndex, pageCount(), viewSpec()); }
+    // Paged modes switch the current sheet so `pageIndex` is in the layout.
+    // Continuous modes only record the focused page.
+    void setViewSpec(ViewSpec spec);
+    void setViewSheet(int sheet);
+    void setPage(int pageIndex);
+
     void setTool(Tool tool) { tool_ = tool; }
     Tool tool() const { return tool_; }
     void setToolStyle(Tool tool, ToolStyle style);
@@ -99,6 +112,7 @@ public:
 private:
     Viewport viewport_;
     NoteDocument notes_;
+    int focusedPage_ = 0;
     Tool tool_ = Tool::Scroll;
     TextSelection selection_;
     std::uint64_t selectionRevision_ = 0;

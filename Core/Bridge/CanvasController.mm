@@ -406,6 +406,17 @@ pager::AnnotationKind MarkupKindFor(pager::Tool tool) {
     [self syncPageLayers];
 }
 
+- (void)layoutDidChange {
+    if (_document == nil) {
+        return;
+    }
+    for (auto &entry : _pageLayers) {
+        [self applyFrame:_document.session.viewport().layout().pageFrame(entry.first) toPage:entry.second];
+    }
+    [self visibleRectDidChange];
+    [self contentDidChange];
+}
+
 - (void)visibleRectDidChange {
     if (_document == nil) {
         return;
@@ -495,9 +506,27 @@ pager::AnnotationKind MarkupKindFor(pager::Tool tool) {
 
 #pragma mark - Page and tile layers
 
+- (void)applyFrame:(const pager::Rect &)frame toPage:(PageLayers &)layers {
+    const CGRect bounds = ToCG(frame);
+    if (CGRectEqualToRect(layers.page.frame, bounds) &&
+        std::fabs(layers.pdf.bounds.size.width - frame.width) < 0.01 &&
+        std::fabs(layers.pdf.bounds.size.height - frame.height) < 0.01) {
+        return;
+    }
+    layers.page.frame = bounds;
+    layers.pdf.frame = CGRectMake(0, 0, frame.width, frame.height);
+    layers.annotations.frame = layers.pdf.frame;
+    CGPathRef shadow = CGPathCreateWithRect(CGRectInset(CGRectMake(0, 0, frame.width, frame.height), -0.5, -0.5), nullptr);
+    layers.page.shadowPath = shadow;
+    CGPathRelease(shadow);
+}
+
 - (PageLayers *)pageLayersFor:(int)pageIndex create:(BOOL)create {
     const auto found = _pageLayers.find(pageIndex);
     if (found != _pageLayers.end()) {
+        if (_document != nil) {
+            [self applyFrame:_document.session.viewport().layout().pageFrame(pageIndex) toPage:found->second];
+        }
         return &found->second;
     }
     if (!create || _document == nil) {
@@ -507,25 +536,19 @@ pager::AnnotationKind MarkupKindFor(pager::Tool tool) {
     PageLayers layers;
     layers.page = [CALayer layer];
     layers.page.actions = NoActions();
-    layers.page.frame = ToCG(frame);
     layers.page.backgroundColor = Color(1, 1, 1, 1);
     layers.page.opaque = YES;
     layers.page.shadowColor = Color(0, 0, 0, 1);
     layers.page.shadowOpacity = 0.16f;
     layers.page.shadowRadius = 1.5;
     layers.page.shadowOffset = CGSizeMake(0, 2);
-    CGPathRef shadow = CGPathCreateWithRect(CGRectInset(CGRectMake(0, 0, frame.width, frame.height), -0.5, -0.5), nullptr);
-    // shadowPath copies; release our reference, not the layer's.
-    layers.page.shadowPath = shadow;
-    CGPathRelease(shadow);
     layers.pdf = [CALayer layer];
     layers.pdf.actions = NoActions();
-    layers.pdf.frame = CGRectMake(0, 0, frame.width, frame.height);
     layers.pdf.masksToBounds = YES;
     layers.annotations = [CALayer layer];
     layers.annotations.actions = NoActions();
-    layers.annotations.frame = layers.pdf.frame;
     layers.annotations.masksToBounds = YES;
+    [self applyFrame:frame toPage:layers];
     [layers.page addSublayer:layers.pdf];
     [layers.page addSublayer:layers.annotations];
     [_pagesLayer addSublayer:layers.page];

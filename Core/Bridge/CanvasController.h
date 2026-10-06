@@ -80,6 +80,8 @@ typedef NS_ENUM(NSInteger, PagerGestureKind) {
 - (void)visibleRectDidChange;
 - (void)visibleRectDidChangeWhileZooming;
 - (void)handleMemoryWarning;
+// ViewSpec or sheet changed: page frames moved. Relayout layers and refetch tiles.
+- (void)layoutDidChange;
 
 // Content changed (notes, selection, search, style); coalesced to the next run-loop turn.
 - (void)contentDidChange;

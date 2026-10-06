@@ -78,8 +78,44 @@ void Viewport::setPages(std::vector<PageGeometry> pages) {
         geometrySlot_[static_cast<std::size_t>(index)] = static_cast<int>(slot);
     }
     // Document space is always PDF displayed-points. Zoom only changes raster density.
-    layout_.rebuild(pages_, 1.0);
     std::lock_guard<std::mutex> queueLock(queueMutex_);
+    rebuildLayoutLocked();
+    bumpGenerationLocked();
+}
+
+void Viewport::rebuildLayoutLocked() {
+    const int pageCount = static_cast<int>(pages_.size());
+    spec_ = spec_.normalized();
+    const int sheets = SheetCount(pageCount, spec_);
+    if (sheets <= 0) {
+        sheet_ = 0;
+    } else {
+        sheet_ = std::clamp(sheet_, 0, sheets - 1);
+    }
+    layout_.rebuild(pages_, spec_, sheet_, 1.0);
+}
+
+void Viewport::setViewSpec(ViewSpec spec) {
+    spec = spec.normalized();
+    if (spec == spec_) {
+        return;
+    }
+    spec_ = spec;
+    std::lock_guard<std::mutex> queueLock(queueMutex_);
+    rebuildLayoutLocked();
+    bumpGenerationLocked();
+}
+
+void Viewport::setSheet(int sheet) {
+    const int pageCount = static_cast<int>(pages_.size());
+    const int count = SheetCount(pageCount, spec_);
+    const int next = count <= 0 ? 0 : std::clamp(sheet, 0, count - 1);
+    if (next == sheet_ && layout_.sheet() == next) {
+        return;
+    }
+    sheet_ = next;
+    std::lock_guard<std::mutex> queueLock(queueMutex_);
+    rebuildLayoutLocked();
     bumpGenerationLocked();
 }
 

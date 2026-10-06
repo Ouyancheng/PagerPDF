@@ -43,6 +43,10 @@ public:
     Viewport& operator=(const Viewport&) = delete;
 
     void setPages(std::vector<PageGeometry> pages);
+    void setViewSpec(ViewSpec spec);
+    void setSheet(int sheet);
+    const ViewSpec& viewSpec() const { return spec_; }
+    int sheet() const { return sheet_; }
     // Raster / pinch zoom. Does not rebuild page frames — those stay in PDF points
     // so the canvas size is stable and UIScrollView can zoom without a flash.
     void setScale(double scale);
@@ -108,9 +112,13 @@ private:
     void publish(TileImage image);
     void bumpGenerationLocked();
 
+    void rebuildLayoutLocked();
+
     std::vector<PageGeometry> pages_;
     std::vector<int> geometrySlot_;
     Layout layout_;
+    ViewSpec spec_{};
+    int sheet_ = 0;
     mutable std::mutex cacheMutex_;
     mutable TileCache cache_;
     double scale_ = 1;

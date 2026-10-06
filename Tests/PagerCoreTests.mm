@@ -273,6 +273,124 @@ NSURL *PDFWithAuthoredAnnotations(void) {
     XCTAssertEqual(layout.pageAt(pager::Point{layout.pages()[1].frame.x + 1, layout.pages()[1].frame.y + 1}), 1);
 }
 
+- (void)testLayoutTwoUpContinuousSharesRows {
+    std::vector<pager::PageGeometry> pages;
+    for (int index = 0; index < 3; ++index) {
+        pager::PageGeometry page = Page(0, 0, 100, 200, pager::PageRotation::R0);
+        page.index = index;
+        pages.push_back(page);
+    }
+    pager::ViewSpec spec;
+    spec.columns = 2;
+    spec.rows = pager::ViewSpec::kContinuous;
+    pager::Layout layout;
+    layout.rebuild(pages, spec, 0, 1);
+    XCTAssertEqual(layout.pages().size(), 3u);
+    XCTAssertEqualWithAccuracy(layout.pageFrame(0).y, layout.pageFrame(1).y, 0.001);
+    XCTAssertGreaterThan(layout.pageFrame(1).x, layout.pageFrame(0).x);
+    XCTAssertGreaterThan(layout.pageFrame(2).y, layout.pageFrame(0).y);
+    XCTAssertEqualWithAccuracy(layout.pageFrame(2).x, layout.pageFrame(0).x, 0.001);
+}
+
+- (void)testLayoutPagedTwoUpPlacesOnlyTheSheet {
+    std::vector<pager::PageGeometry> pages;
+    for (int index = 0; index < 4; ++index) {
+        pager::PageGeometry page = Page(0, 0, 100, 200, pager::PageRotation::R0);
+        page.index = index;
+        pages.push_back(page);
+    }
+    pager::ViewSpec spec;
+    spec.columns = 2;
+    spec.rows = 1;
+    pager::Layout first;
+    first.rebuild(pages, spec, 0, 1);
+    XCTAssertEqual(first.pages().size(), 2u);
+    XCTAssertTrue(first.frameFor(0) != nullptr);
+    XCTAssertTrue(first.frameFor(1) != nullptr);
+    XCTAssertTrue(first.frameFor(2) == nullptr);
+    pager::Layout second;
+    second.rebuild(pages, spec, 1, 1);
+    XCTAssertEqual(second.pages().size(), 2u);
+    XCTAssertTrue(second.frameFor(2) != nullptr);
+    XCTAssertTrue(second.frameFor(3) != nullptr);
+    XCTAssertTrue(second.frameFor(0) == nullptr);
+    XCTAssertEqual(pager::SheetForPage(2, 4, spec), 1);
+    XCTAssertEqual(pager::FirstPageOfSheet(1, 4, spec), 2);
+}
+
+- (void)testLayoutCoverAloneLeavesFirstSheetSingle {
+    std::vector<pager::PageGeometry> pages;
+    for (int index = 0; index < 5; ++index) {
+        pager::PageGeometry page = Page(0, 0, 100, 200, pager::PageRotation::R0);
+        page.index = index;
+        pages.push_back(page);
+    }
+    pager::ViewSpec spec;
+    spec.columns = 2;
+    spec.rows = 1;
+    spec.coverAlone = YES;
+    XCTAssertEqual(pager::SheetCount(5, spec), 3);
+    XCTAssertEqual(pager::SheetForPage(0, 5, spec), 0);
+    XCTAssertEqual(pager::SheetForPage(1, 5, spec), 1);
+    XCTAssertEqual(pager::PagesOnSheet(0, 5, spec), 1);
+    XCTAssertEqual(pager::PagesOnSheet(1, 5, spec), 2);
+    pager::Layout cover;
+    cover.rebuild(pages, spec, 0, 1);
+    XCTAssertEqual(cover.pages().size(), 1u);
+    XCTAssertEqual(cover.pages()[0].index, 0);
+    pager::Layout spread;
+    spread.rebuild(pages, spec, 1, 1);
+    XCTAssertEqual(spread.pages().size(), 2u);
+    XCTAssertEqual(spread.pages()[0].index, 1);
+    XCTAssertEqual(spread.pages()[1].index, 2);
+}
+
+- (void)testLayoutHorizontalStripGrowsWidth {
+    pager::PageGeometry first = Page(0, 0, 100, 200, pager::PageRotation::R0);
+    pager::PageGeometry second = first;
+    second.index = 1;
+    pager::ViewSpec spec;
+    spec.columns = pager::ViewSpec::kContinuous;
+    spec.rows = 1;
+    pager::Layout layout;
+    layout.rebuild({first, second}, spec, 0, 1);
+    XCTAssertEqual(layout.pages().size(), 2u);
+    XCTAssertEqualWithAccuracy(layout.pageFrame(0).y, layout.pageFrame(1).y, 0.001);
+    XCTAssertGreaterThan(layout.pageFrame(1).x, layout.pageFrame(0).x);
+    XCTAssertEqualWithAccuracy(layout.contentSize().width,
+                               pager::Layout::kMargin * 2 + 100 + pager::Layout::kPageGap + 100, 0.001);
+    XCTAssertEqual(layout.pageAt(pager::Point{layout.pageFrame(1).x + 1, layout.pageFrame(1).y + 1}), 1);
+    XCTAssertTrue(spec.prefersFitHeight());
+    pager::ViewSpec twoUp;
+    twoUp.columns = 2;
+    twoUp.rows = 1;
+    XCTAssertFalse(twoUp.prefersFitHeight());
+}
+
+- (void)testViewportViewSpecMovesFramesAndBumpsGeneration {
+    std::vector<pager::PageGeometry> pages;
+    for (int index = 0; index < 3; ++index) {
+        pager::PageGeometry page = Page(0, 0, 100, 200, pager::PageRotation::R0);
+        page.index = index;
+        pages.push_back(page);
+    }
+    pager::Viewport viewport;
+    viewport.setPages(pages);
+    const std::uint64_t before = viewport.generation();
+    const pager::Rect stacked = viewport.layout().pageFrame(1);
+    pager::ViewSpec spec;
+    spec.columns = 2;
+    spec.rows = 1;
+    viewport.setViewSpec(spec);
+    XCTAssertGreaterThan(viewport.generation(), before);
+    XCTAssertTrue(viewport.layout().frameFor(1) != nullptr);
+    XCTAssertEqualWithAccuracy(viewport.layout().pageFrame(0).y, viewport.layout().pageFrame(1).y, 0.001);
+    XCTAssertNotEqual(stacked.y, viewport.layout().pageFrame(1).y);
+    viewport.setSheet(1);
+    XCTAssertTrue(viewport.layout().frameFor(0) == nullptr);
+    XCTAssertTrue(viewport.layout().frameFor(2) != nullptr);
+}
+
 - (void)testScaleKeyTracksExactZoom {
     XCTAssertEqual(pager::ScaleKeyForZoom(1), 100);
     XCTAssertEqual(pager::ScaleKeyForZoom(2), 200);

@@ -94,6 +94,14 @@ NSMenu *BuildMainMenu(void) {
     Add(view, @"Zoom to Fit Width", @selector(zoomToFitWidth:), @"9");
     Add(view, @"Zoom to Fit Page", @selector(zoomToFitPage:), @"8");
     [view addItem:NSMenuItem.separatorItem];
+    Add(view, @"Continuous Scroll", @selector(selectViewPreset:), nil, 0, 1);
+    Add(view, @"Single Page", @selector(selectViewPreset:), nil, 0, 2);
+    Add(view, @"Two Pages", @selector(selectViewPreset:), nil, 0, 3);
+    Add(view, @"Two Pages Continuous", @selector(selectViewPreset:), nil, 0, 4);
+    Add(view, @"Horizontal Scroll", @selector(selectViewPreset:), nil, 0, 5);
+    Add(view, @"Show Cover Page Alone", @selector(toggleCoverAlone:), nil, 0);
+    Add(view, @"Custom Layout…", @selector(showCustomLayout:), nil, 0);
+    [view addItem:NSMenuItem.separatorItem];
     Add(view, @"Enter Full Screen", @selector(toggleFullScreen:), @"f", ctrlCmd);
 
     NSMenu *go = Submenu(bar, @"Go");
