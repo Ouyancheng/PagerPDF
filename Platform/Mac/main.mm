@@ -70,6 +70,8 @@ NSMenu *BuildMainMenu(void) {
     Add(edit, @"Delete", @selector(delete:), nil, 0);
     Add(edit, @"Select All", @selector(selectAll:), @"a");
     [edit addItem:NSMenuItem.separatorItem];
+    Add(edit, @"Search with Google", @selector(searchSelectionOnGoogle:), nil, 0);
+    [edit addItem:NSMenuItem.separatorItem];
     NSMenu *find = [[NSMenu alloc] initWithTitle:@"Find"];
     Add(find, @"Find…", @selector(performFindPanelAction:), @"f");
     Add(find, @"Find Next", @selector(findNext:), @"g");

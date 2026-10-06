@@ -1105,6 +1105,10 @@ NSScrollView *ScrollFor(NSView *documentView) {
     [_canvas tryToPerform:@selector(copy:) with:sender];
 }
 
+- (void)searchSelectionOnGoogle:(id)sender {
+    [_canvas tryToPerform:@selector(searchSelectionOnGoogle:) with:sender];
+}
+
 #pragma mark - PagerCanvasViewDelegate
 
 - (void)canvasViewNotesChanged:(PagerCanvasView *)canvas {
@@ -1965,6 +1969,9 @@ NSScrollView *ScrollFor(NSView *documentView) {
     if (action == @selector(copy:)) {
         const pager::Annotation *note = session->selectedAnnotation();
         return !session->selection().text.empty() || (note != nullptr && !note->contents.empty());
+    }
+    if (action == @selector(searchSelectionOnGoogle:)) {
+        return !session->selection().text.empty();
     }
     if (action == @selector(previousPage:) || action == @selector(firstPage:)) {
         return [self currentPageIndex] > 0;

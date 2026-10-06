@@ -15,6 +15,8 @@
 
 @interface PadCanvasView () <PagerCanvasHost, UITextViewDelegate, UIEditMenuInteractionDelegate, UIGestureRecognizerDelegate>
 - (void)drawLiveInContext:(CGContextRef)context rect:(CGRect)rect;
+- (void)lookUpCurrentSelection;
+- (void)searchSelectionOnGoogle;
 @end
 
 @interface PadLiveView : UIView
@@ -222,6 +224,47 @@ UIFont *NoteTextFont(const pager::Annotation &note) {
 
 - (void)applyMarkupKind:(pager::AnnotationKind)kind {
     [_controller applyMarkupKind:kind];
+}
+
+- (NSString *)selectedText {
+    if (_document == nil || _document.session.selection().text.empty()) {
+        return @"";
+    }
+    return [@(_document.session.selection().text.c_str())
+        stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+}
+
+- (void)searchSelectionOnGoogle {
+    NSString *query = [self selectedText];
+    if (query.length == 0) {
+        return;
+    }
+    NSURLComponents *components = [NSURLComponents componentsWithString:@"https://www.google.com/search"];
+    components.queryItems = @[[NSURLQueryItem queryItemWithName:@"q" value:query]];
+    NSURL *url = components.URL;
+    if (url != nil) {
+        [UIApplication.sharedApplication openURL:url options:@{} completionHandler:nil];
+    }
+}
+
+- (void)lookUpCurrentSelection {
+    NSString *query = [self selectedText];
+    if (query.length == 0) {
+        return;
+    }
+    UIViewController *host = nil;
+    for (UIResponder *responder = self; responder != nil; responder = responder.nextResponder) {
+        if ([responder isKindOfClass:UIViewController.class]) {
+            host = (UIViewController *)responder;
+            break;
+        }
+    }
+    if (host == nil) {
+        return;
+    }
+    UIReferenceLibraryViewController *lookup = [[UIReferenceLibraryViewController alloc] initWithTerm:query];
+    lookup.modalPresentationStyle = UIModalPresentationPageSheet;
+    [host presentViewController:lookup animated:YES completion:nil];
 }
 
 #pragma mark - PagerCanvasHost
@@ -539,6 +582,16 @@ UIFont *NoteTextFont(const pager::Annotation &note) {
                                           UIPasteboard.generalPasteboard.string =
                                               @(self_->_document.session.selection().text.c_str()) ?: @"";
                                       }];
+    UIAction *lookUp = [UIAction actionWithTitle:@"Look Up" image:[UIImage systemImageNamed:@"book"] identifier:nil
+                                        handler:^(__unused UIAction *action) {
+                                            [weakSelf lookUpCurrentSelection];
+                                        }];
+    UIAction *google = [UIAction actionWithTitle:@"Search with Google"
+                                          image:[UIImage systemImageNamed:@"magnifyingglass"]
+                                     identifier:nil
+                                        handler:^(__unused UIAction *action) {
+                                            [weakSelf searchSelectionOnGoogle];
+                                        }];
     UIAction *highlight = [UIAction actionWithTitle:@"Highlight" image:[UIImage systemImageNamed:@"highlighter"] identifier:nil
                                            handler:^(__unused UIAction *action) {
                                                [weakSelf applyMarkupKind:pager::AnnotationKind::Highlight];
@@ -551,7 +604,7 @@ UIFont *NoteTextFont(const pager::Annotation &note) {
                                         handler:^(__unused UIAction *action) {
                                             [weakSelf applyMarkupKind:pager::AnnotationKind::StrikeOut];
                                         }];
-    return [UIMenu menuWithChildren:@[copy, highlight, underline, strike]];
+    return [UIMenu menuWithChildren:@[copy, lookUp, google, highlight, underline, strike]];
 }
 
 #pragma mark - Touches

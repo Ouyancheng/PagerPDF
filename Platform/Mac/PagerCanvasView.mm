@@ -35,6 +35,74 @@ NSImage *Swatch(pager::Color color) {
                    }];
 }
 
+NSString *TrimmedSelectionText(const pager::DocumentSession &session) {
+    if (session.selection().text.empty()) {
+        return @"";
+    }
+    return [@(session.selection().text.c_str())
+        stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+}
+
+NSString *GoogleSearchTitle(NSString *query) {
+    if (query.length == 0) {
+        return @"Search with Google";
+    }
+    NSString *snippet = query;
+    if (snippet.length > 28) {
+        snippet = [[snippet substringToIndex:28] stringByAppendingString:@"…"];
+    }
+    return [NSString stringWithFormat:@"Search Google for “%@”", snippet];
+}
+
+NSURL *GoogleSearchURL(NSString *query) {
+    if (query.length == 0) {
+        return nil;
+    }
+    NSURLComponents *components = [NSURLComponents componentsWithString:@"https://www.google.com/search"];
+    components.queryItems = @[[NSURLQueryItem queryItemWithName:@"q" value:query]];
+    return components.URL;
+}
+
+BOOL ToolAllowsTextLookUp(pager::Tool tool) {
+    switch (tool) {
+        case pager::Tool::Scroll:
+        case pager::Tool::SelectNote:
+        case pager::Tool::SelectText:
+        case pager::Tool::Highlight:
+        case pager::Tool::Underline:
+        case pager::Tool::StrikeOut:
+            return YES;
+        default:
+            return NO;
+    }
+}
+
+BOOL SelectionContainsDocumentPoint(const pager::DocumentSession &session, pager::Point document) {
+    const pager::Layout &layout = session.viewport().layout();
+    const int pageIndex = layout.pageAt(document);
+    if (pageIndex < 0) {
+        return NO;
+    }
+    const pager::PageGeometry *page = session.viewport().geometry(pageIndex);
+    if (page == nullptr) {
+        return NO;
+    }
+    const pager::Rect frame = layout.pageFrame(pageIndex);
+    const pager::Point user =
+        pager::PageViewToUser(*page, pager::Point{document.x - frame.x, document.y - frame.y});
+    for (const pager::SelectionQuad &quad : session.selection().quads) {
+        if (quad.pageIndex != pageIndex) {
+            continue;
+        }
+        const pager::Rect bounds = pager::BoundsOfPoints(quad.quad.v[0], quad.quad.v[2]).united(
+            pager::BoundsOfPoints(quad.quad.v[1], quad.quad.v[3]));
+        if (bounds.contains(user)) {
+            return YES;
+        }
+    }
+    return NO;
+}
+
 }  // namespace
 
 // A layer-hosting view whose sublayers use the canvas's top-down document coordinates.
@@ -103,6 +171,9 @@ NSImage *Swatch(pager::Color color) {
     PagerLiveDrawer *_liveDrawer;
     NSTextView *_textEditor;
     NSTrackingArea *_tracking;
+    BOOL _forceClickLookUpShown;
+    BOOL _pressedOnSelection;
+    pager::TextSelection _pressedSelection;
 }
 
 - (instancetype)initWithFrame:(NSRect)frame {
@@ -396,13 +467,22 @@ NSImage *Swatch(pager::Color color) {
 }
 
 - (void)mouseDown:(NSEvent *)event {
+    _forceClickLookUpShown = NO;
+    _pressedOnSelection = NO;
+    _pressedSelection = {};
     if (_document == nil) {
         return;
     }
     if (self.window.firstResponder != self && self.window.firstResponder != _textEditor) {
         [self.window makeFirstResponder:self];
     }
-    const PagerGestureKind gesture = [_controller beginGestureAt:[self documentPoint:event] clickCount:event.clickCount];
+    const pager::Point document = [self documentPoint:event];
+    if (TrimmedSelectionText(_document.session).length > 0 &&
+        SelectionContainsDocumentPoint(_document.session, document)) {
+        _pressedOnSelection = YES;
+        _pressedSelection = _document.session.selection();
+    }
+    const PagerGestureKind gesture = [_controller beginGestureAt:document clickCount:event.clickCount];
     if (gesture == PagerGestureInk) {
         [_controller beginInk:std::vector<pager::InkSample>{[self sampleFrom:event]} predicted:std::vector<pager::InkSample>{}];
     }
@@ -435,6 +515,93 @@ NSImage *Swatch(pager::Color color) {
 - (void)smartMagnifyWithEvent:(NSEvent *)event {
     const NSPoint point = [self convertPoint:event.locationInWindow fromView:nil];
     [self.delegate canvasView:self smartMagnifyAt:point];
+}
+
+#pragma mark - Force click / Look Up
+
+- (NSPoint)selectionBaselineInView {
+    if (_document == nil || _document.session.selection().quads.empty()) {
+        return NSMakePoint(NSMidX(self.visibleRect), NSMidY(self.visibleRect));
+    }
+    const pager::SelectionQuad &quad = _document.session.selection().quads.front();
+    const pager::PageGeometry *page = _document.session.viewport().geometry(quad.pageIndex);
+    if (page == nullptr) {
+        return NSMakePoint(NSMidX(self.visibleRect), NSMidY(self.visibleRect));
+    }
+    const pager::Rect frame = _document.session.viewport().layout().pageFrame(quad.pageIndex);
+    const pager::Point a = pager::UserToPageView(*page, quad.quad.v[0]);
+    const pager::Point b = pager::UserToPageView(*page, quad.quad.v[1]);
+    return NSMakePoint(frame.x + (a.x + b.x) * 0.5, frame.y + (a.y + b.y) * 0.5);
+}
+
+- (BOOL)prepareLookUpAt:(pager::Point)document {
+    if (_document == nil || _textEditor != nil || !ToolAllowsTextLookUp(_document.session.tool())) {
+        return NO;
+    }
+    if ([_controller noteAt:document] != nullptr || _document.session.viewport().layout().pageAt(document) < 0) {
+        return NO;
+    }
+    [_controller cancelGesture];
+    if (_pressedOnSelection && !_pressedSelection.text.empty()) {
+        _document.session.setSelection(_pressedSelection);
+        [_controller updateSelectionLayers];
+        return YES;
+    }
+    if (TrimmedSelectionText(_document.session).length > 0 &&
+        SelectionContainsDocumentPoint(_document.session, document)) {
+        return YES;
+    }
+    [_controller selectTextFrom:document to:document word:YES];
+    return TrimmedSelectionText(_document.session).length > 0;
+}
+
+- (void)showDefinitionForCurrentSelectionAt:(NSPoint)origin {
+    if (_document == nil) {
+        return;
+    }
+    NSString *text = TrimmedSelectionText(_document.session);
+    if (text.length == 0) {
+        return;
+    }
+    NSAttributedString *string =
+        [[NSAttributedString alloc] initWithString:text attributes:@{NSFontAttributeName : [NSFont systemFontOfSize:16]}];
+    [self showDefinitionForAttributedString:string atPoint:origin];
+}
+
+- (void)lookUpAtEvent:(NSEvent *)event {
+    if (_forceClickLookUpShown) {
+        return;
+    }
+    if (![self prepareLookUpAt:[self documentPoint:event]]) {
+        return;
+    }
+    _forceClickLookUpShown = YES;
+    [self showDefinitionForCurrentSelectionAt:[self convertPoint:event.locationInWindow fromView:nil]];
+}
+
+- (void)quickLookWithEvent:(NSEvent *)event {
+    [self lookUpAtEvent:event];
+}
+
+- (void)pressureChangeWithEvent:(NSEvent *)event {
+    [super pressureChangeWithEvent:event];
+    if (event.stage >= 2) {
+        [self lookUpAtEvent:event];
+    }
+}
+
+- (void)lookUpSelection:(id)sender {
+    [self showDefinitionForCurrentSelectionAt:[self selectionBaselineInView]];
+}
+
+- (void)searchSelectionOnGoogle:(id)sender {
+    if (_document == nil) {
+        return;
+    }
+    NSURL *url = GoogleSearchURL(TrimmedSelectionText(_document.session));
+    if (url != nil) {
+        [NSWorkspace.sharedWorkspace openURL:url];
+    }
 }
 
 - (void)updateTrackingAreas {
@@ -553,6 +720,14 @@ NSImage *Swatch(pager::Color color) {
     const BOOL hasText = !session.selection().quads.empty();
     NSMenuItem *copy = [menu addItemWithTitle:@"Copy" action:@selector(copy:) keyEquivalent:@""];
     copy.target = self;
+    if (hasText) {
+        NSMenuItem *lookUp = [menu addItemWithTitle:@"Look Up" action:@selector(lookUpSelection:) keyEquivalent:@""];
+        lookUp.target = self;
+        NSMenuItem *google = [menu addItemWithTitle:GoogleSearchTitle(TrimmedSelectionText(session))
+                                             action:@selector(searchSelectionOnGoogle:)
+                                      keyEquivalent:@""];
+        google.target = self;
+    }
     [menu addItem:NSMenuItem.separatorItem];
     const struct {
         NSString *title;
@@ -637,6 +812,9 @@ NSImage *Swatch(pager::Color color) {
     if (action == @selector(highlightSelection:) || action == @selector(underlineSelection:) ||
         action == @selector(strikeSelection:)) {
         return !session.selection().quads.empty();
+    }
+    if (action == @selector(lookUpSelection:) || action == @selector(searchSelectionOnGoogle:)) {
+        return TrimmedSelectionText(session).length > 0;
     }
     if (action == @selector(editSelectedNote)) {
         const pager::Annotation *note = session.selectedAnnotation();
